@@ -37,9 +37,9 @@ public class Account {
         if (amount < 0) {
             System.out.println("Cannot withdraw negative amount.");
         } else if (balance < amount) {
-          if(parentAccount != null){
-            int newWithdraw = amount - balance;
-            return this.parentAccount.withdraw(newWithdraw) && this.withdraw(balance);
+            if(parentAccount != null) {
+              int newWithdraw = amount - balance;
+              return this.parentAccount.withdraw(newWithdraw) && this.withdraw(balance);
           } else {
             System.out.println("Insufficient funds");
           }

@@ -193,12 +193,11 @@ public class IntList {
      */
     public static IntList dcatenate(IntList A, IntList B) {
         // YOUR CODE HERE
-        /*
-        while (A.next != null) {
-            A = A.next;
-            combined.add(A.item);
+        if (B == null) {
+            return A;
+        } else if (A == null) {
+            return B;
         }
-        */
         while(B.next != null) {
             A.add(B.item);
             B = B.next;
@@ -216,6 +215,11 @@ public class IntList {
      * @return new list with A followed by B.
      */
      public static IntList catenate(IntList A, IntList B) {
+         if (B == null) {
+             return A;
+         } else if (A == null) {
+             return B;
+         }
          IntList combined = new IntList(A.item);
          while (A.next != null) {
              A = A.next;

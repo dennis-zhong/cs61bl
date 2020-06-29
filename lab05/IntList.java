@@ -50,7 +50,13 @@ public class IntList {
      */
     public int get(int position) {
         // YOUR CODE HERE
-        return -1;
+        if((position>0 && (this.next == null)) || position < 0) {
+            throw new IllegalArgumentException("position is out of range");
+        } else if(position==0) {
+            return this.item;
+        } else {
+            return next.get(position-1);
+        }
     }
 
     /**
@@ -61,7 +67,11 @@ public class IntList {
      */
     public String toString() {
         // YOUR CODE HERE
-        return null;
+        if (this.next == null) {
+            return String.valueOf(this.item);
+        } else {
+            return String.valueOf(this.item) + " " + next.toString();
+        }
     }
 
     /**
@@ -72,7 +82,18 @@ public class IntList {
      */
     public boolean equals(Object obj) {
         // YOUR CODE HERE
-        return false;
+        if (!(obj instanceof IntList)) {
+            return false;
+        }
+
+        IntList pointer = (IntList) obj;
+        if (pointer.item != this.item) {
+            return false;
+        } else if (this.next == null && pointer.next == null) {
+            return true;
+        } else {
+            return this.next.equals(pointer.next);
+        }
     }
 
     /**
@@ -82,6 +103,11 @@ public class IntList {
      */
     public void add(int value) {
         // YOUR CODE HERE
+        if(this.next == null) {
+            this.next = new IntList(value);
+        } else {
+            next.add(value);
+        }
     }
 
     /**
@@ -91,7 +117,11 @@ public class IntList {
      */
     public int smallest() {
         // YOUR CODE HERE
-        return -1;
+        if (this.next == null) {
+            return this.item;
+        } else {
+            return Math.min(this.item, next.smallest());
+        }
     }
 
     /**
@@ -101,7 +131,11 @@ public class IntList {
      */
     public int squaredSum() {
         // YOUR CODE HERE
-        return -1;
+        if (this.next == null) {
+            return this.item*this.item;
+        } else {
+            return this.item*this.item + next.squaredSum();
+        }
     }
 
     /**
@@ -159,7 +193,18 @@ public class IntList {
      */
     public static IntList dcatenate(IntList A, IntList B) {
         // YOUR CODE HERE
-        return null;
+        /*
+        while (A.next != null) {
+            A = A.next;
+            combined.add(A.item);
+        }
+        */
+        while(B.next != null) {
+            A.add(B.item);
+            B = B.next;
+        }
+        A.add(B.item);
+        return A;
     }
 
     /**
@@ -171,7 +216,16 @@ public class IntList {
      * @return new list with A followed by B.
      */
      public static IntList catenate(IntList A, IntList B) {
-        // YOUR CODE HERE
-         return null;
+         IntList combined = new IntList(A.item);
+         while (A.next != null) {
+             A = A.next;
+             combined.add(A.item);
+         }
+         while(B.next != null) {
+             combined.add(B.item);
+             B = B.next;
+         }
+         combined.add(B.item);
+         return combined;
      }
 }

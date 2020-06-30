@@ -119,10 +119,48 @@ public class SLList {
     /** Adds x to the list at the specified index. */
     public void add(int index, int x) {
         // TODO
+        IntListNode pointer = sentinel;
+        while(index >= 0) {
+            if(pointer.next == sentinel) {
+                pointer.next = new IntListNode(x, null);
+                pointer.next.next = sentinel;
+                size+=1;
+                return;
+            } else if(index == 0) {
+                pointer.next = new IntListNode(x, pointer.next);
+                size += 1;
+                return;
+            } else {
+                pointer = pointer.next;
+                index--;
+            }
+        }
     }
 
     /** Destructively reverses this list. */
     public void reverse() {
         // TODO
+        /*
+        SLList list = new SLList();
+        for(int i = 0; i < this.size; i++) {
+            list.addFirst(this.get(i));
+        }
+        sentinel = list.sentinel;
+         */
+        sentinel.next = reverseHelper(sentinel.next);
+    }
+
+    private IntListNode reverseHelper(IntListNode node) {
+        if(node.next == sentinel) {
+            return node;
+        }
+        IntListNode temp = reverseHelper(node.next);
+        IntListNode pointer = temp;
+        while(pointer.next != sentinel) {
+            pointer = pointer.next;
+        }
+        pointer.next = node;
+        node.next = sentinel;
+        return temp;
     }
 }

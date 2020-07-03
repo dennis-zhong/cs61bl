@@ -51,6 +51,7 @@ public class LinkedListDeque<T> implements Deque<T>{
         sentinel.previous = sentinel;
     }
 
+    /*
     //Constructor that accepts value
     public LinkedListDeque(T input) {
         sentinel = new TNode<>(null, null, null);
@@ -64,24 +65,7 @@ public class LinkedListDeque<T> implements Deque<T>{
         TNode<T> pointer = sentinel.next;
         while(!pointer.next.equals(sentinel)) pointer = pointer.next;
         sentinel.previous = pointer;
-    }
-
-    /* prob dont need this
-    //Constructor that links to further Deques
-    public LinkedListDeque(T input, TNode<T> node) {
-        sentinel = new TNode<>(null, null, null);
-        sentinel.next = new TNode<>(input, node, sentinel);
-        size++;
-        node = node.next;
-    }
-     */
-
-    //making a method like "of" from sl list
-    public void fill(T... items) {
-        for(int i = 0; i < items.length; i++) {
-            addLast(items[i]);
-        }
-    }
+    }*/
 
     //Adds an item of type T to the front of the deque.
     @Override
@@ -89,7 +73,6 @@ public class LinkedListDeque<T> implements Deque<T>{
         TNode<T> temp = sentinel.next;
         sentinel.next = new TNode(item, temp, sentinel);
         temp.previous = sentinel.next;
-        //connectSentToEnd();
         size++;
     }
 
@@ -98,14 +81,12 @@ public class LinkedListDeque<T> implements Deque<T>{
     public void addLast(T item) {
         TNode<T> temp = sentinel.previous;
         sentinel.previous.next = new TNode<>(item, sentinel, temp);
-        //temp.next = sentinel.previous;
-        sentinel.previous = sentinel.previous.next;//fix
-        //connectSentToEnd();
+        sentinel.previous = sentinel.previous.next;
         size++;
     }
 
     //equals method for Deques
-    @Override
+    /*
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || !(obj instanceof LinkedListDeque)) {
@@ -124,17 +105,7 @@ public class LinkedListDeque<T> implements Deque<T>{
             pointer2 = pointer2.next;
         }
         return true;
-    }
 
-    /* shouldnt need for sentinel
-    //Size helper method
-    private void correctSize() {//change to static, collect length then set
-        LinkedListDeque<T> deque = this;
-        this.size = 0;
-        while(deque != null && !deque.isEmpty()) {
-            this.size++;
-            deque = deque.nextD;
-        }//how should size work
     }*/
 
     //Returns the number of items in the deque.

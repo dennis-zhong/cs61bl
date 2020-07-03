@@ -1,6 +1,6 @@
 public class ArrayDeque<T> implements Deque<T>{
 
-    public T[] tArr;
+    private T[] tArr;
     private int nextFirst;
     private int nextLast;
     private int size;

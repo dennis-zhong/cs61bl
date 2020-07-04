@@ -99,12 +99,13 @@ public class LinkedListDequeTest {
             LinkedListDeque<Integer> lld2 = new LinkedListDeque<>();
             for(int i = 1; i < 10; i++) {
                 lld2.addLast(i);
-            }            //assertTrue(lld1.equals(lld2));
+            }
+            //assertTrue(lld1.equals(lld2));
+            assertTrue(9 == lld1.removeLast());
             lld1.removeLast();
             lld1.removeLast();
-            lld1.removeLast();
-            assertTrue(lld1.size()==6);
-            lld1.removeFirst();
+            assertTrue(lld1.size() == 6);
+            assertTrue(lld1.removeFirst() == 1);
             lld1.removeFirst();
         } finally {
             System.out.println("Printing out deque: ");

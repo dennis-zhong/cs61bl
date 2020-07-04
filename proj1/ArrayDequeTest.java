@@ -16,31 +16,32 @@ public class ArrayDequeTest {
         arrD.addLast(7);
         arrD.addLast(8);
         arrD.printDeque();
-        for(int i = 9; i<=16; i++) {
+        for(int i = 9; i<=16; i++) {//should expand correctly
             arrD.addLast(i);
         }
         arrD.printDeque();
-        for(int i = 0; i>=-15; i--) {
+        assertTrue(arrD.size() == 16);
+        for(int i = 0; i>=-15; i--) {//should expand again
             arrD.addFirst(i);
         }
         arrD.printDeque();
-        for(int i = -16; i>=-100; i--) {
+        for(int i = -16; i>=-100; i--) {//expand
             arrD.addFirst(i);
         }
         int j = 0;
         for(int i = -100; i<17; i++) {
-            assertTrue(i==arrD.get(j));
+            assertTrue(i==arrD.get(j));//check if everything inside is right
             j++;
         }
         for(int i = 17; i<=10000; i++) {
-            arrD.addLast(i);
+            arrD.addLast(i);//expand alot
         }
         j = 0;
         for(int i = -100; i<10000; i++) {
-            assertTrue(i==arrD.get(j));
+            assertTrue(i==arrD.get(j));//check if expand worked
             j++;
         }
-        arrD.printDeque();
+        arrD.printDeque();//if expand didn't work there should be some null pointer exceptions
     }
 
     @Test
@@ -72,18 +73,18 @@ public class ArrayDequeTest {
         }
         //arrD.printDeque(); //extend arr to preparing for downsizing
         j = 0;
-        for(int i = -10; i<101; i++) {//check if indexs are in order right
+        for(int i = -10; i<101; i++) {//check if indexs are in right order
             assertTrue(i==arrD.get(j));
             j++;
         }
         for(int x = 0; x<47; x++) {
             arrD.removeLast();
         }
-        //arrD.printDeque();//check if it downsizes, it shouldnt
+        arrD.printDeque();//check if it downsizes, it prob shouldnt
         for(int x = 0; x<32; x++) {
             arrD.removeLast();
         }
-        //arrD.printDeque(); //now it should downsize
+        arrD.printDeque(); //now it should downsize
         for(int x = 0; x<31; x++) {
             arrD.removeLast();
         }

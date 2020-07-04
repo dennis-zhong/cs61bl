@@ -34,7 +34,7 @@ public class LinkedListDeque<T> implements Deque<T>{
             if(this.item != null) {
                 return this.item.toString();
             } else {
-                return "null";
+                return null;
             }
         }
     }
@@ -117,6 +117,9 @@ public class LinkedListDeque<T> implements Deque<T>{
     //Prints the items in the deque from first to last, separated by a space. Once all the items have been printed, print out a new line.
     @Override
     public void printDeque() {
+        if (this.isEmpty()) {
+            return;
+        }
         TNode<T> curr = sentinel.next;
         for (int i = 0; i < size-1; i++) {
             System.out.print(curr.toString()+" ");
@@ -139,32 +142,33 @@ public class LinkedListDeque<T> implements Deque<T>{
     //Removes and returns the item at the back of the deque. If no such item exists, returns null.
     @Override
     public T removeLast() {
+        if(this.isEmpty()) return null;
         T item = sentinel.previous.item;
         sentinel.previous.previous.next = sentinel;
         sentinel.previous = sentinel.previous.previous;
         size--;
-        return sentinel.item;
+        return item;
     }
 
     //Gets the item at the given index, where 0 is the front, 1 is the next item, and so forth. If no such item exists, returns null. Must not alter the deque!
     @Override
     public T get(int index){
-        if ((index > this.size()) || index < 0) {
-            throw new IllegalArgumentException("invalid index"); //catch errors
+        if ((index >= this.size()) || index < 0) {
+            return null; //catch errors
+        } else {
+            TNode<T> pointer = sentinel.next;
+            while (index > 0) {
+                pointer = pointer.next;
+                index--;
+            }
+            return pointer.item;
         }
-
-        TNode<T> pointer = sentinel.next;
-        while(index > 0) {
-            pointer = pointer.next;
-            index--;
-        }
-        return pointer.item;
     }
 
     //Same as get, but this method should be implemented using recursion
     public T getRecursive(int index) {
-        if ((index > this.size()) || index < 0) {
-            throw new IllegalArgumentException("invalid index"); //catch errors
+        if ((index >= this.size()) || index < 0) {
+            return null; //catch errors
         }
 
         TNode<T> pointer = sentinel.next;

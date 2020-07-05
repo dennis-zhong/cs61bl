@@ -1,11 +1,16 @@
 import org.junit.Test;
+
+import java.util.Random;
+
 import static org.junit.Assert.*;
 
 public class ArrayDequeTest {
 
     @Test
     public void addAndExpandTest() {
-        ArrayDeque<Integer> arrD = new ArrayDeque<>();
+        Deque<Integer> arrD = new ArrayDeque<>();
+        arrD.printDeque();
+        System.out.println("printed empty");
         arrD.addFirst(4);
         assertTrue(arrD.size() == 1);
         arrD.addFirst(3);
@@ -46,8 +51,8 @@ public class ArrayDequeTest {
 
     @Test
     public void removeAndDownsizeTest() {
-        ArrayDeque<Integer> arrD = new ArrayDeque<>();
-
+        Deque<Integer> arrD = new ArrayDeque<>();
+        System.out.println(arrD.get(0));
         for(int i = 9; i<=16; i++) {
             arrD.addLast(i);
         }
@@ -110,5 +115,42 @@ public class ArrayDequeTest {
             arrD2.addLast(i);
         }
         arrD2.printDeque();
+    }
+
+    @Test
+    public void fuzzTest() {
+        LinkedListDeque<Double> lld = new LinkedListDeque<>();
+        ArrayDeque<Double> arrD = new ArrayDeque<>();
+        Random rd = new Random();
+        double rand;
+        double rand2;
+        double rand3;
+        for(int i = 0; i < 1000; i++) {
+            rand = rd.nextDouble();
+            rand2 = rd.nextDouble();
+            if(rand<.3){
+                if(rand2<.5) {
+                    lld.removeFirst();
+                    arrD.removeFirst();
+                } else {
+                    lld.removeLast();
+                    arrD.removeLast();
+                }
+            } else {
+                rand3 = rd.nextDouble();
+                if(rand2<.5) {
+                    lld.addFirst(rand3);
+                    arrD.addFirst(rand3);
+                } else {
+                    lld.addLast(rand3);
+                    arrD.addLast(rand3);
+                }
+            }
+        }
+        for(int i = 0; i < 2000; i++) {
+            assertEquals(arrD.get(i), lld.get(i));
+        }
+        arrD.printDeque();
+        lld.printDeque();
     }
 }

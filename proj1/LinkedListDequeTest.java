@@ -83,7 +83,7 @@ public class LinkedListDequeTest {
     public void removeTest() {
         System.out.println("Running remove test.");
         LinkedListDeque<Integer> lld1 = new LinkedListDeque<>();
-
+        System.out.println(lld1.get(0));
         try {
             assertTrue(lld1.isEmpty());
             lld1.addFirst(5);
@@ -117,7 +117,8 @@ public class LinkedListDequeTest {
     public void getTest() {
         System.out.println("Running get test.");
         LinkedListDeque<Integer> lld1 = new LinkedListDeque<>();
-
+        lld1.printDeque();
+        System.out.println("printed empty");
         try {
             assertTrue(lld1.isEmpty());
             lld1.addFirst(5);
@@ -126,7 +127,7 @@ public class LinkedListDequeTest {
             lld1.addFirst(2);
             lld1.addFirst(1);
             for(int i = 0; i < lld1.size(); i++) {
-                System.out.println(lld1.get(i));
+                assertTrue(lld1.get(i)==lld1.getRecursive(i));
             }
         } finally {
             System.out.println("Printing out deque: ");

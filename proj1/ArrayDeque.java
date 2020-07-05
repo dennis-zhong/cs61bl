@@ -83,6 +83,10 @@ public class ArrayDeque<T> implements Deque<T>{
     //Prints the items in the deque from first to last, separated by a space. Once all the items have been printed, print out a new line.
     @Override
     public void printDeque() {
+        if(this.isEmpty()) {
+            System.out.println("");
+            return;
+        }
         int i = 0;//keep track of how many there are
         int j = (nextFirst+1)%tArr.length;//match i w the correct location in arr
         while(i<size-1) {
@@ -127,6 +131,7 @@ public class ArrayDeque<T> implements Deque<T>{
     //Gets the item at the given index, where 0 is the front, 1 is the next item, and so forth. If no such item exists, returns null. Must not alter the deque!
     @Override
     public T get(int index){
+        if(index >= size || index < 0) return null;
         return tArr[(nextFirst+1+index)%tArr.length];
     }
 }

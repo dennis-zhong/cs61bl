@@ -40,8 +40,6 @@ public class LinkedListDeque<T> implements Deque<T>{
     }
 
     private TNode<T> sentinel;
-    private TNode<T> firstN;
-    private TNode<T> lastN;
     private int size;
 
     //Constructor which creates an empty linked list deque.
@@ -118,6 +116,7 @@ public class LinkedListDeque<T> implements Deque<T>{
     @Override
     public void printDeque() {
         if (this.isEmpty()) {
+            System.out.println("");
             return;
         }
         TNode<T> curr = sentinel.next;

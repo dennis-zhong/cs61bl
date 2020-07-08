@@ -20,13 +20,13 @@ public class DNASequenceSet {
     public boolean contains(int[] sequence) {
         DNANode pointer = sentinel;
         for (int i = 0; i < sequence.length; i++) {
-            if(pointer.nexts[sequence[i]].endOfSequence) { continue; }
+            if(pointer.nexts[sequence[i]].endOfSequence) { return true; }
             if (pointer.nexts[sequence[i]] == null) {
                 return false;
             }
             pointer = pointer.nexts[sequence[i]];
         }
-        return true;
+        return false;
     }
 
 

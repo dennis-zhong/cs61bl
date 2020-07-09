@@ -20,8 +20,10 @@ public class BooleanSet implements SimpleSet {
             System.out.println("bad input");
             return;
         }
-        contains[k] = true;
-        size++;
+        if(!contains[k]) {
+            contains[k] = true;
+            size++;
+        }
     }
 
     /** Removes k from the set. */
@@ -31,8 +33,10 @@ public class BooleanSet implements SimpleSet {
             System.out.println("bad input");
             return;
         }
-        contains[k] = false;
-        size--;
+        if(contains[k]) {
+            contains[k] = false;
+            size--;
+        }
     }
 
     /** Return true if k is in this set, false otherwise. */

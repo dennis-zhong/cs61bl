@@ -12,6 +12,17 @@ public class GregorianDate extends Date {
     // YOUR CODE HERE
 
     @Override
+    public Date nextDate() {
+        if(month == 12 && dayOfMonth == 31) {
+            return new GregorianDate(year+1, 1, 1);
+        } else if (dayOfMonth == getMonthLength(month)) {
+            return new GregorianDate(year, month+1, 1);
+        } else {
+            return new GregorianDate(year, month, dayOfMonth+1);
+        }
+    }
+
+    @Override
     public int dayOfYear() {
         int precedingMonthDays = 0;
         for (int m = 1; m < month; m += 1) {

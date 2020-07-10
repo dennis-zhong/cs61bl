@@ -1,6 +1,8 @@
 package capers;
 
-import java.io.File;
+//import edu.princeton.cs.algs4.ST;
+
+import java.io.*;
 
 /** Canine Capers: A Gitlet Prelude.
  * @author Sean Dooher
@@ -10,7 +12,8 @@ public class Main {
     static final File CWD = new File(".");
 
     /** Main metadata folder. */
-    static final File CAPERS_FOLDER = null; // FIXME
+    static final File CAPERS_FOLDER = new File("capers/.capers"); // FIXME
+    static final File STORY_FOLDER = new File("capers/.capers/story");
 
     /**
      * Runs one of three commands:
@@ -49,7 +52,12 @@ public class Main {
         case "story":
             writeStory(args);
             break;
-        // FIXME
+        case "dog":
+            makeDog(args);
+            break;
+        case "birthday":
+            celebrateBirthday(args);
+            break;
         default:
             exitWithError(String.format("Unknown command: %s", args[0]));
         }
@@ -68,6 +76,13 @@ public class Main {
      */
     public static void setupPersistence() {
         // FIXME
+        try {
+            CAPERS_FOLDER.mkdir();
+            Dog.DOG_FOLDER.mkdir();
+            STORY_FOLDER.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -78,6 +93,9 @@ public class Main {
     public static void writeStory(String[] args) {
         validateNumArgs("story", args, 2);
         // FIXME
+        STORY_FOLDER.exists();
+        Utils.writeContents(STORY_FOLDER, Utils.readContentsAsString(STORY_FOLDER) + args[1] + "\n");
+        System.out.println(Utils.readContentsAsString(STORY_FOLDER));
     }
 
     /**
@@ -90,6 +108,8 @@ public class Main {
     public static void makeDog(String[] args) {
         validateNumArgs("dog", args, 4);
         // FIXME
+        Dog d = new Dog(args[1], args[2], Integer.parseInt(args[3]));
+        d.saveDog();
     }
 
     /**
@@ -102,6 +122,9 @@ public class Main {
     public static void celebrateBirthday(String[] args) {
         validateNumArgs("birthday", args, 2);
         // FIXME
+        Dog d = Dog.fromFile(args[1]);
+        d.haveBirthday();
+        d.saveDog();
     }
 
     /**

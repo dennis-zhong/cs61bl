@@ -50,7 +50,7 @@ public class Dog implements Serializable { // FIXME
      */
     public void saveDog() {
         // FIXME
-        File dogFile = new File(".capers/dog/"+this._name);
+        File dogFile = new File("capers/dog/"+this._name);
         Utils.writeObject(dogFile, this);
     }
 

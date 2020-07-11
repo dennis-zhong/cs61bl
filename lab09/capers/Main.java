@@ -12,8 +12,8 @@ public class Main {
     static final File CWD = new File(".");
 
     /** Main metadata folder. */
-    static final File CAPERS_FOLDER = new File("capers/.capers"); // FIXME
-    static final File STORY_FOLDER = new File("capers/.capers/story");
+    static final File CAPERS_FOLDER = new File(".capers"); // FIXME
+    static final File STORY_FOLDER = new File(".capers/story");
 
     /**
      * Runs one of three commands:

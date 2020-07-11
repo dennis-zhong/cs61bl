@@ -109,6 +109,7 @@ public class Main {
         validateNumArgs("dog", args, 4);
         // FIXME
         Dog d = new Dog(args[1], args[2], Integer.parseInt(args[3]));
+        System.out.println(d.toString());
         d.saveDog();
     }
 

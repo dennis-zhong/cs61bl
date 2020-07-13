@@ -1,7 +1,7 @@
 import java.util.Arrays;
 import java.util.Objects;
 
-public class User {
+public class User<T> implements Comparable<T>{
 
     private static int nextId = 1;
 
@@ -50,6 +50,20 @@ public class User {
 
     void setEmail(String email) {
         this.email = email;
+    }
+
+    @Override
+    public int compareTo(T user) {
+        if(!(user instanceof User)) {
+            throw new IllegalArgumentException();
+        }
+        if (((User) user).getId() == this.getId()) {
+            return this.getName().compareTo(((User) user).getName());
+        } else if (this.getId()-((User) user).getId() < 0) {
+            return -1;
+        } else {
+            return 1;
+        }
     }
 
     @Override

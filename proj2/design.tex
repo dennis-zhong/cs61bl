@@ -1,5 +1,6 @@
 \documentclass[10pt]{article}
 \usepackage{geometry} 
+\usepackage{changepage}
 \usepackage{titlesec}
 \usepackage{titling}
 \usepackage{fontspec}
@@ -7,7 +8,16 @@
 \usepackage{amsthm}  
 \usepackage{amsfonts}  
 \usepackage{amssymb}  
-\geometry{a4paper}
+\usepackage{enumitem,amssymb}
+\newlist{todolist}{itemize}{2}
+\setlist[todolist]{label=$\square$}
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+\newcommand{\done}{\rlap{$\square$}{\raisebox{2pt}{\large\hspace{1pt}\cmark}}%
+\hspace{-2.5pt}}
+\newcommand{\wontfix}{\rlap{$\square$}{\large\hspace{1pt}\xmark}}
+\geometry{a4paper,left=2cm,right=2cm,top=1cm,bottom=2cm}
 \linespread{1.3}  
 
 \author{Dennis Zhong, Haodong Li}
@@ -17,13 +27,92 @@
 
 \begin{document}
 \maketitle
+\setcounter{section}{-1}
 
-\section{Chapter one} %first level
-\subsection{The second level} %second level
-\subsubsection{The third level} %third level
-\paragraph{Installation} If the document class \emph{elsarticle} is not available on your computer, you can download and install the system package \emph{texlive-publishers} (Linux) or install the \LaTeX\ package \emph{elsarticle} using the package manager of your \TeX\ installation, which is typically \TeX\ Live or Mik\TeX.
+\section{Overview} %Part0 overview
 
-\paragraph{} If the \underline{document} class \emph{elsarticle} is not available on your computer, you can download and install the system package \emph{texlive-publishers} (Linux) or install the \LaTeX\ package \emph{elsarticle} using the package manager of your \TeX installation, which is typically \TeX\ Live or Mik\TeX.
+\subsection{List of commands} %Part0.1 
+  \begin{adjustwidth}{2em}{0pt}
+  \begin{todolist}
+  \item[\done]  \bfseries init
+  \item add
+  \item commit
+  \item rm
+  \item log
+  \item global-log
+  \item find
+  \item status
+  \item checkout
+  \item branch
+  \item rm-branch
+  \item reset
+  \item merge
+  \item rebase
+  \end{todolist}
+  \end{adjustwidth}
+  
+\subsection{Attention} %Part0.2
+  \begin{adjustwidth}{2em}{0pt}
+  \begin{itemize}
+  \item Always exit with \textbf{exit code 0}
+  \item \textbf{.gitlet} contains all old files and meta files
+  \item General \textbf{failure cases}:\\
+        doesn’t input any arguments------Please enter a command.\\
+        inputs a command that doesn’t exist------No command with that name exists.\\
+        inputs a command with the wrong number or format of operands------Incorrect operands.\\
+        inputs a command not in such a directory------Not in an initialized Gitlet directory.
+  \end{itemize}
+  \end{adjustwidth}
+
+
+\newpage
+
+\section{Classes and Data Structures} %Part1
+\subsection{Commit} %Part1.1
+  \begin{adjustwidth}{2em}{0pt}
+  \begin{itemize}
+  \item String timestamp
+  \item String message
+  \item Blob[ ] blobs
+  \item Commit pa1
+  \item Commit pa2
+  \end{itemize}
+  \end{adjustwidth}
+ 
+\subsection{Blob} %Part1.2
+\begin{adjustwidth}{2em}{0pt}
+  \begin{itemize}
+  \item String name
+  \item String contents
+  \end{itemize}
+  \end{adjustwidth}
+  
+\subsection{Branch} %Part1.3
+
+\section{Algorithms} %first level
+\subsection{TBD} %second level
+
+
+\section{Persistence} %first level
+
+\paragraph{} We will be saving a representation of the object created to file. Thus, the settings provided in the first run should persist across multiple executions of the program, as we will be able to reload the object.
+
+\paragraph{} In order to persist the state of files, we must save the necessary data elements. That is: write the Commit and Blob to disk. We can serialize them into bytes that we can eventually write to a file on disk, named based on a set naming convention. This can be done with the writeObject() method from the Utils class.
+
+\paragraph{} In order to retrieve our state, before executing any code, we need to search for the saved files in the working directory (folder in which our program exists) and load the objects that we saved in them. Since we set on a file naming convention (TBD) our program always knows which files it should look for. We can use the readObject() method from the Utils class to read the data of files and deserialize the associated objects we previously wrote to these files
+
 
 
 \end{document}
+
+
+
+
+
+
+
+
+
+
+
+

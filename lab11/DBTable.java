@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class DBTable<T> {
     private List<T> entries;
@@ -48,7 +49,10 @@ public class DBTable<T> {
      */
     public <R extends Comparable<R>> List<T> getOrderedBy(Function<T, R> getter) {
         // TODO
-        return null;
+        List<T> lst = getEntries();
+        return lst.stream()
+                .sorted((x, y) -> getter.apply(x).compareTo(getter.apply(y)))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -70,7 +74,10 @@ public class DBTable<T> {
      */
     public <R> List<T> getWhitelisted(Function<T, R> getter, Collection<R> whitelist) {
         // TODO
-        return null;
+        List<T> lst = getEntries();
+        return lst.stream().filter(x->whitelist
+                .contains(getter.apply(x)))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -79,8 +86,8 @@ public class DBTable<T> {
      * DBTable<String> names = table.getSubtableOf(User::getUsername);
      */
     public <R> DBTable<R> getSubtableOf(Function<T, R> getter) {
-        // TODO
-        return null;
+        List<T> lst = getEntries();
+        return new DBTable<>(lst.stream().map(x->getter.apply(x)).collect(Collectors.toList()));
     }
 
     public static void main(String[] args) {

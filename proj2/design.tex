@@ -95,7 +95,7 @@
 
 \section{Persistence} %first level
 
-\paragraph{} We will be saving a representation of the object created to file. Thus, the settings provided in the first run should persist across multiple executions of the program, as we will be able to reload the object.
+\paragraph{} We will be saving a representation of the object created to file. Thus, the settings provided in the first run should persist across multiple executions of the program, as we will be able to reload the object. 
 
 \paragraph{} In order to persist the state of files, we must save the necessary data elements. That is: write the Commit and Blob to disk. We can serialize them into bytes that we can eventually write to a file on disk, named based on a set naming convention. This can be done with the writeObject() method from the Utils class.
 

@@ -2,6 +2,7 @@ package gitlet;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -123,10 +124,11 @@ public class Main {
         checkInit();
         File pointer = HEAD;
         Commit currCom;
+        SimpleDateFormat formatter = new SimpleDateFormat("E MMM d HH:mm:ss y Z");
         for(int i = 0; i<COMMIT_FOLDER.listFiles().length; i++) {
             currCom = Utils.readObject(pointer, Commit.class);
             System.out.println("===\ncommit "+currCom.toString()+
-                    "\nDate: "+currCom.getDate().toString()+"\n"
+                    "\nDate: "+formatter.format(currCom.getDate())+"\n"
                     +currCom.getMessage());
             if (currCom.prev != null) {
                 pointer = currCom.prev.commitFile;

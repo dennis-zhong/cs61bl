@@ -34,6 +34,14 @@ public class Commit implements Serializable {
         Utils.writeObject(commitFile, this);
     }
 
+    public Date getDate() {
+        return timestamp;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
     public HashMap<String, Blob> getBlobs() {
         return blobs;
     }

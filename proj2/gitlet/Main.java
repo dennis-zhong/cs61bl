@@ -37,6 +37,9 @@ public class Main {
             case "commit":
                 commit(args);
                 break;
+            case "log":
+                log(args);
+                break;
             default:
                 exitWithError("No command with that name exists.");
         }
@@ -79,9 +82,9 @@ public class Main {
         }
         Commit head = Utils.readObject(HEAD, Commit.class);
         Blob newBlob = new Blob(args[1]);
-        if (!head.getBlobs().isEmpty()) {
+        if (head.getBlobs().get(args[1]) != null) {//check if prev blob already in commit head
             if (newBlob.getContents().equals(head.getBlobs().get(args[1]).getContents())) {
-                return;
+                return;//if contents r same dont add it
             }
         }
         Utils.writeObject(new File(".gitlet/stage/"+newBlob.getName()), newBlob);
@@ -113,6 +116,22 @@ public class Main {
 
     public static void setHead(Commit com) {
         Utils.writeObject(HEAD, com);
+    }
+
+    public static void log(String[] args) {
+        validateNumArgs(args, 1);
+        checkInit();
+        File pointer = HEAD;
+        Commit currCom;
+        for(int i = 0; i<COMMIT_FOLDER.listFiles().length; i++) {
+            currCom = Utils.readObject(pointer, Commit.class);
+            System.out.println("===\ncommit "+currCom.toString()+
+                    "\nDate: "+currCom.getDate().toString()+"\n"
+                    +currCom.getMessage());
+            if (currCom.prev != null) {
+                pointer = currCom.prev.commitFile;
+            }
+        }
     }
 
     /**

@@ -20,6 +20,7 @@ public class Main {
     static final File STAGING_FOLDER = new File(".gitlet/stage");
     static final File COMMIT_FOLDER = new File(".gitlet/commit");
     static final File BLOB_FOLDER = new File(".gitlet/blobs");
+    static final File REMOVE_FOLDER = new File(".gitlet/removeStage");
     static final File HEAD = new File("HEAD");
 
     /** Usage: java gitlet.Main ARGS, where ARGS contains
@@ -42,6 +43,9 @@ public class Main {
             case "log":
                 log(args);
                 break;
+            case "rm":
+                remove(args);
+                break;
             default:
                 exitWithError("No command with that name exists.");
         }
@@ -58,6 +62,7 @@ public class Main {
         STAGING_FOLDER.mkdir();
         COMMIT_FOLDER.mkdir();
         BLOB_FOLDER.mkdir();
+        REMOVE_FOLDER.mkdir();
         try {
             HEAD.createNewFile();
         } catch (IOException e) {
@@ -126,14 +131,34 @@ public class Main {
         File pointer = HEAD;
         Commit currCom;
         SimpleDateFormat formatter = new SimpleDateFormat("E MMM d HH:mm:ss y Z");
-        formatter.setTimeZone(TimeZone.getTimeZone("PST"));
+        formatter.setTimeZone(TimeZone.getTimeZone("GMT-800"));
         for(int i = 0; i<COMMIT_FOLDER.listFiles().length; i++) {
             currCom = Utils.readObject(pointer, Commit.class);
             System.out.println("===\ncommit "+currCom.toString()+
                     "\nDate: "+formatter.format(currCom.getDate())+"\n"
-                    +currCom.getMessage());
+                    +currCom.getMessage()+"\n");
             if (currCom.prev != null) {
                 pointer = currCom.prev.commitFile;
+            }
+        }
+    }
+
+    public static void remove(String[] args) {
+        validateNumArgs(args, 2);
+        checkInit();
+        File stageFile = new File(".gitlet/stage/"+args[1]);
+        Blob newBlob = Utils.readObject(HEAD, Commit.class).getBlobs().get(args[1]);//finds blob in head com
+        if(newBlob == null && !stageFile.exists()) {
+            exitWithError("No reason to remove the file");
+        }
+        if(stageFile.exists()) {
+            stageFile.delete();
+        }
+        if(newBlob != null) {
+            Utils.writeObject(new File(".gitlet/removeStage/"+args[1]), newBlob);//puts in remove stage
+            File currFile = new File(args[1]);
+            if(currFile.exists()) {
+                currFile.delete();
             }
         }
     }

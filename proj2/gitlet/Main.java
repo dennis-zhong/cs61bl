@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 
 /** Driver class for Gitlet, the tiny stupid version-control system.
  *  @author
@@ -125,6 +126,7 @@ public class Main {
         File pointer = HEAD;
         Commit currCom;
         SimpleDateFormat formatter = new SimpleDateFormat("E MMM d HH:mm:ss y Z");
+        formatter.setTimeZone(TimeZone.getTimeZone("PST"));
         for(int i = 0; i<COMMIT_FOLDER.listFiles().length; i++) {
             currCom = Utils.readObject(pointer, Commit.class);
             System.out.println("===\ncommit "+currCom.toString()+

@@ -1,3 +1,5 @@
+import com.sun.source.tree.Tree;
+
 public class BinaryTree<T> {
 
     TreeNode<T> root;
@@ -17,20 +19,37 @@ public class BinaryTree<T> {
     /* Returns the height of the tree. */
     public int height() {
         // TODO: YOUR CODE HERE
-        return 0;
+        if (this.root == null) {
+            return 0;
+        } else {
+            return 1 + Math.max(root.left.height(), root.right.height());
+        }
     }
 
     /* Returns true if the tree's left and right children are the same height
        and are themselves completely balanced. */
     public boolean isCompletelyBalanced() {
         // TODO: YOUR CODE HERE
-        return false;
+        if(root == null) {
+            return true;
+        } else {
+            return root.left.height() == root.right.height() && root.left.isCompletelyBalanced() && root.right.isCompletelyBalanced();
+        }
     }
 
     /* Returns a BinaryTree representing the Fibonacci calculation for N. */
     public static BinaryTree<Integer> fibTree(int N) {
-        BinaryTree<Integer> result = new BinaryTree<Integer>();
-        return null;
+        BinaryTree<Integer> result = new BinaryTree<Integer>(new TreeNode<Integer>(0));
+        if(N==0) {
+            result.root.setItem(0);
+        } else if(N==1) {
+            result.root.setItem(1);
+        } else {
+            result.root.setLeft(TreeNode.fibTree(N-1));
+            result.root.setRight(TreeNode.fibTree(N-2));
+            result.root.setItem(result.root.getLeft().getItem()+result.root.getRight().getItem());
+        }
+        return result;
     }
 
     /* Print the values in the tree in preorder: root value first, then values
@@ -97,11 +116,32 @@ public class BinaryTree<T> {
         BinaryTree t;
         t = new BinaryTree();
         print(t, "the empty tree");
+        System.out.println(t.height());
+        System.out.println(t.isCompletelyBalanced());
+
         t.sampleTree1();
         print(t, "sample tree 1");
+        System.out.println(t.height());
+        System.out.println(t.isCompletelyBalanced());
+
         t.sampleTree2();
         print(t, "sample tree 2");
+        System.out.println(t.height());
+        System.out.println(t.isCompletelyBalanced());
+
+        t.sampleTree4();
+        print(t, "sample tree 4");
+        System.out.println(t.height());
+        System.out.println(t.isCompletelyBalanced());
+
+        print(fibTree(5), "fib tree");
     }
+    //A B C D E
+    //B D E C A
+    //B A D C E
+
+    //A C
+    //D E
 
     /* Note: this class is public in this lab for testing purposes. However,
        in professional settings as well as the rest of your labs and projects,
@@ -168,6 +208,40 @@ public class BinaryTree<T> {
             }
         }
 
-        // TODO: ADD HELPER METHODS HERE
+        private int height() {
+            if (left == null && right == null) {
+                return 1;
+            } else if (left != null && right == null) {
+                return 1 + left.height();
+            } else if (left == null && right != null) {
+                return 1 + right.height();
+            } else {
+                return 1 + Math.max(left.height(), right.height());
+            }
+        }
+
+        private boolean isCompletelyBalanced() {
+            if(left == right) {
+                return true;
+            } else {
+                return left.height() == right.height() && left.isCompletelyBalanced()
+                        && right.isCompletelyBalanced();
+            }
+        }
+
+        private static TreeNode<Integer> fibTree(int n) {
+            TreeNode<Integer> result = new TreeNode<>(0);
+            if(n == 0) {
+                return result;
+            } else if(n == 1) {
+                result.setItem(1);
+                return result;
+            } else {
+                result.setLeft(fibTree(n-1));
+                result.setRight(fibTree(n-2));
+                result.setItem(result.getLeft().getItem()+result.getRight().getItem());;
+            }
+            return result;
+        }
     }
 }

@@ -1,5 +1,4 @@
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.*;
 
 /* An AmoebaFamily is a tree, where nodes are Amoebas, each of which can have
    any number of children. */
@@ -26,7 +25,9 @@ public class AmoebaFamily implements Iterable<AmoebaFamily.Amoeba> {
        the ROOT Amoeba printed first. Each Amoeba should be indented four spaces
        more than its parent. */
     public void print() {
-        // TODO: YOUR CODE HERE
+        if(root != null) {
+            root.print(root, 0);
+        }
     }
 
     /* Returns the length of the longest name in this AmoebaFamily. */
@@ -45,7 +46,7 @@ public class AmoebaFamily implements Iterable<AmoebaFamily.Amoeba> {
 
     /* Returns an Iterator for this AmoebaFamily. */
     public Iterator<Amoeba> iterator() {
-        return new AmoebaDFSIterator();
+        return new AmoebaBFSIterator();
     }
 
     /* Creates a new AmoebaFamily and prints it out. */
@@ -65,6 +66,10 @@ public class AmoebaFamily implements Iterable<AmoebaFamily.Amoeba> {
         family.addChild("Marge", "Hilary");
         System.out.println("Here's the family:");
         family.print();
+
+        for(Amoeba a: family) {
+            System.out.println(a.toString());
+        }
     }
 
     /* An Amoeba is a node of an AmoebaFamily. */
@@ -116,6 +121,20 @@ public class AmoebaFamily implements Iterable<AmoebaFamily.Amoeba> {
         }
 
         // TODO: ADD HELPER FUNCTIONS HERE
+        public void print(Amoeba root, int level) {
+            for (int i = 0; i < level * 4; i++) {
+                System.out.print(" ");
+            }
+            if(root.children.isEmpty()) {
+                System.out.println(root.name);
+            } else {
+                System.out.println(root.name);
+                level++;
+                for (Amoeba a : root.children) {
+                    a.print(a, level);
+                }
+            }
+        }
 
     }
 
@@ -126,25 +145,36 @@ public class AmoebaFamily implements Iterable<AmoebaFamily.Amoeba> {
 
         // TODO: IMPLEMENT THE CLASS HERE
 
+        private Stack<Amoeba> fringe = new Stack<>();
+
         /* AmoebaDFSIterator constructor. Sets up all of the initial information
            for the AmoebaDFSIterator. */
         public AmoebaDFSIterator() {
+            fringe.push(root);
         }
 
         /* Returns true if there is a next element to return. */
         public boolean hasNext() {
-            return false;
+            if(fringe.isEmpty()) {
+                return false;
+            }
+            return true;
         }
 
         /* Returns the next element. */
         public Amoeba next() {
-            return null;
+            Amoeba a = fringe.pop();
+            ArrayList<Amoeba> lst = a.getChildren();
+            for(int i = lst.size()-1; i >=0; i--) {
+                fringe.push(lst.get(i));
+            }
+            return a;
         }
 
         public void remove() {
             throw new UnsupportedOperationException();
         }
-    }
+    }//1 5 9 11 10 6 8 7 2 4 3
 
     /* An Iterator class for the AmoebaFamily, running a BFS traversal on the
        AmoebaFamily. Complete enumeration of a family of N Amoebas should take
@@ -152,20 +182,30 @@ public class AmoebaFamily implements Iterable<AmoebaFamily.Amoeba> {
     public class AmoebaBFSIterator implements Iterator<Amoeba> {
 
         // TODO: IMPLEMENT THE CLASS HERE
+        LinkedList<Amoeba> queue = new LinkedList<>();
+
 
         /* AmoebaBFSIterator constructor. Sets up all of the initial information
            for the AmoebaBFSIterator. */
         public AmoebaBFSIterator() {
+            queue.add(root);
         }
 
         /* Returns true if there is a next element to return. */
         public boolean hasNext() {
-            return false;
+            if(queue.isEmpty()) {
+                return false;
+            }
+            return true;
         }
 
         /* Returns the next element. */
         public Amoeba next() {
-            return null;
+            Amoeba a = queue.removeFirst();
+            for(Amoeba am: a.getChildren()) {
+                queue.add(am);
+            }
+            return a;
         }
 
         public void remove() {

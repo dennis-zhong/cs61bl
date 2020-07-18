@@ -24,6 +24,7 @@ public class Main {
     static final File REMOVE_FOLDER = new File(".gitlet/removeStage");
     static final File BRANCH_FOLDER = new File(".gitlet/branches");
     static final File HEAD = new File(".gitlet/HEAD");
+    static final File BRANCH_POINTER = new File(".gitlet/currB");
 
     /** Usage: java gitlet.Main ARGS, where ARGS contains
      *  <COMMAND> <OPERAND> .... */
@@ -60,6 +61,15 @@ public class Main {
             case "checkout":
                 checkout(args);
                 break;
+            case "branch":
+                branch(args);
+                break;
+            case "rm-branch":
+                removeBranch(args);
+                break;
+            case "reset":
+                reset(args);
+                break;
             default:
                 exitWithError("No command with that name exists.");
         }
@@ -80,15 +90,16 @@ public class Main {
         //REMOVE_FOLDER.mkdir();
         try {
             HEAD.createNewFile();
+            //BRANCH_POINTER.createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
         Commit initial = new Commit();
         Branch master = new Branch();
         initial.saveCommit();
-        setHead(initial);
         master.setHead(initial);
-        master.saveBranch();
+        setHead(master);
+
         Stage stagingFolder = new Stage("stage");
         Stage removeFolder = new Stage("removeStage");
         stagingFolder.saveStage();
@@ -148,20 +159,23 @@ public class Main {
             newBlobs.put(blob.getName(), blob.getBlobFile().getName());
         }
         Commit com = new Commit(newBlobs, args[1], getHead());
-        Branch currBranch = getHead().getBranch();
+        Branch currBranch = getHeadBranch();
         com.saveCommit();
-        setHead(com);
         currBranch.setHead(com);
+        setHead(currBranch);
         getStage().emptyStage();
     }
 
     public static Commit getHead() {
-        return Utils.readObject(HEAD, Commit.class);
+        return Utils.readObject(HEAD, Branch.class).getHead();
     }
 
-    public static void setHead(Commit com) {
-        HEAD.delete();
-        Utils.writeObject(HEAD, com);
+    public static Branch getHeadBranch() {
+        return Utils.readObject(HEAD, Branch.class);
+    }
+
+    public static void setHead(Branch br) {
+        Utils.writeObject(HEAD, br);
     }
 
     public static Stage getStage() {
@@ -171,22 +185,36 @@ public class Main {
     public static Stage getRemoved() {
         return Utils.readObject(REMOVE_FOLDER, Stage.class);
     }
+    public static Commit getComFromFile(String name){
+        File file = new File(".gitlet/commit/"+name);
+        Commit currCom = null;
+        if(file.exists()) {
+            currCom = Utils.readObject(file, Commit.class);
+        }
+        if (currCom == null) {
+            for(File comfile: COMMIT_FOLDER.listFiles()) {
+                if (comfile.getName().startsWith(name)) {
+                    currCom = Commit.readCommit(comfile.getName());
+                }
+            }
+            if (currCom == null) {
+                exitWithError("No commit with that id exists.");
+            }
+        }
+        return currCom;
+    }
 
     public static void log(String[] args) {
         validateNumArgs(args, 1);
         checkInit();
-        File pointer = HEAD;
-        Commit currCom;
+        Commit currCom = getHead();
         SimpleDateFormat formatter = new SimpleDateFormat("E MMM d HH:mm:ss y Z");
         formatter.setTimeZone(TimeZone.getTimeZone("GMT-800"));
-        for(int i = 0; i<COMMIT_FOLDER.listFiles().length; i++) {
-            currCom = Utils.readObject(pointer, Commit.class);
+        while (currCom != null) {
             System.out.println("===\ncommit "+currCom.getID()+
                     "\nDate: "+formatter.format(currCom.getDate())+"\n"
                     +currCom.getMessage()+"\n");
-            if (currCom.prev != null) {
-                pointer = currCom.prev.commitFile;
-            }
+            currCom = currCom.prev;
         }
     }
 
@@ -243,7 +271,7 @@ public class Main {
         System.out.println("=== Branches ===");
         for(File branch: BRANCH_FOLDER.listFiles()) {
             Branch br = Utils.readObject(branch, Branch.class);
-            if(br.getHead().getID().equals(getHead().getID())) {
+            if(br.toString().equals(getHeadBranch().toString())) {
                 System.out.print("*");
             }
             System.out.println(br);
@@ -319,30 +347,23 @@ public class Main {
             overWrite = Blob.getBlobObj(getHead().getBlobs().get(args[2]));
             dest = new File("./" + args[2]);
         } else if (args.length == 4) {
-            Commit currCom = getHead().getBranch().getComFromFile(args[1]);
-            if (currCom == null) {
-                for(File file: COMMIT_FOLDER.listFiles()) {
-                    if (file.getName().startsWith(args[1])) {
-                        currCom = Commit.readCommit(file.getName());
-                    }
-                }
-                if (currCom == null) {
-                    exitWithError("No commit with that id exists.");
-                }
-            }
+            Commit currCom = getComFromFile(args[1]);
             overWrite = Blob.getBlobObj(currCom.getBlobs().get(args[3]));
             dest = new File("./" + args[3]);
         } else {
             validateNumArgs(args, 2);
-            Branch br = new Branch(args[1]);
-            if(!br.getFile().exists()) {
+            Branch br = Branch.getBranch(args[1]);
+            if(br == null) {
                 exitWithError("No such branch exists");
-            } if(getHead().getBranch().getFile().equals(br.getFile())) {
+            } if(getHeadBranch().getFile().equals(br.getFile())) {
                 exitWithError("No need to checkout the current branch");
             }
             ArrayList<String> untracked = new ArrayList<>();
             ArrayList<String> tracked = new ArrayList<>();
             for(File file: CWD.listFiles()) {
+                if(file.isDirectory() || !file.getName().endsWith(".txt")) {//remove the .txt later
+                    continue;
+                }
                 untracked.add(file.getName());
             } for(String str: getHead().getBlobs().keySet()) {
                 untracked.remove(str);
@@ -351,19 +372,24 @@ public class Main {
                 untracked.remove(Blob.getBlobObj(file).getName());
             }
             if(!untracked.isEmpty()) {
+                for(String str: untracked) {
+                    System.out.println(str);
+                }
                 exitWithError("There is an untracked file in the way; delete it, or add and commit it first.");
             }
-            for(String blob: br.getHead().getBlobs().keySet()) {
+            for(String blob: br.getHead().getBlobs().values()) {
                 Blob currBlob = Blob.getBlobObj(blob);
                 File currFile = new File("./"+currBlob.getName());
                 if (currFile.exists()) {
-                    Utils.writeContents(currFile, currBlob);
+                    Utils.writeContents(currFile, currBlob.getContents());
                     tracked.remove(currBlob.getName());
                 }
             }
-            setHead(br.head);
+            setHead(br);
             for(String str: tracked) {//delete files in curr dir that r tracked in previous commit
-                new File("./"+str).delete();
+                if(!br.getHead().getBlobs().keySet().contains(str)) {
+                    new File("./"+str).delete();
+                }
             }
             getStage().emptyStage();
             return;
@@ -372,6 +398,36 @@ public class Main {
             exitWithError("File does not exist in that commit.");
         }
         Utils.writeContents(dest, overWrite.getContents());
+    }
+
+    public static void branch(String[] args) {
+        validateNumArgs(args, 2);
+        if(new File(".gitlet/branches/"+args[1]).exists()) {
+            exitWithError("A branch with that name already exists.");
+        }
+        Branch branch = new Branch(args[1]);
+        branch.setHead(getHead());
+        branch.saveBranch();
+    }
+
+    public static void removeBranch(String[] args) {
+        validateNumArgs(args, 2);
+        File branchFile = new File(".gitlet/branches/"+args[1]);
+        if(!branchFile.exists()) {
+            exitWithError("A branch with that name does not exist.");
+        } else if(branchFile.equals(getHeadBranch().getFile())){
+            exitWithError("Cannot remove the current branch.");
+        } else {
+            branchFile.delete();
+        }
+    }
+
+    public static void reset(String[] args) {
+        validateNumArgs(args, 2);
+        Commit curr = getComFromFile(args[1]);
+        for(String str: curr.getBlobs().values()) {
+            Blob.getBlobObj(str);
+        }
     }
 
     /**

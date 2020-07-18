@@ -43,13 +43,12 @@ public class Branch implements Serializable {
         return comBranch.get(id);
     }
 
-    public static Commit getComFromFile(String name){
-        File file = new File(".gitlet/commit/"+name);
+    public static Branch getBranch(String name) {
+        File file = new File(".gitlet/branches/"+name);
         if(!file.exists()) {
             return null;
-        } else {
-            return Utils.readObject(file, Commit.class);
         }
+        return Utils.readObject(file, Branch.class);
     }
 
     public void saveBranch() {

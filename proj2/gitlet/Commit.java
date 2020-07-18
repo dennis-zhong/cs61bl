@@ -12,7 +12,6 @@ public class Commit implements Serializable {
     HashMap<String, String> blobs = new HashMap<>();
     Commit prev;
     File commitFile;
-    Branch branch = new Branch();
 
     public Commit() {
         timestamp = new Date(0);
@@ -38,14 +37,6 @@ public class Commit implements Serializable {
 
     public String getMessage() {
         return message;
-    }
-
-    public Branch getBranch() {
-        return this.branch;
-    }
-    public void setBranch(Branch branch) {
-        this.branch = branch;
-        this.saveCommit();
     }
 
     public HashMap<String, String> getBlobs() {

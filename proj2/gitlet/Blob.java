@@ -12,15 +12,25 @@ public class Blob implements Serializable {
         this.name = name;
         contents = Utils.readContentsAsString(new File(name));
         blobFile = new File(".gitlet/blobs/"+toString());
-        Utils.writeObject(blobFile, this);
     }
 
     public String getName() {
         return name;
     }
 
+    public void saveBlob() {
+        Utils.writeObject(blobFile, this);
+    }
+
     public File getBlobFile() {
         return this.blobFile;
+    }
+
+    public static Blob getBlobObj(String name) {
+        if(name == null) {
+            return null;
+        }
+        return Utils.readObject(new File(".gitlet/blobs/"+name), Blob.class);
     }
 
     public String getContents() {

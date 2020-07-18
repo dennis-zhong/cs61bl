@@ -3,17 +3,16 @@ package gitlet;
 import java.io.File;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Commit implements Serializable {
     Date timestamp;
     String message;
-    HashMap<String, Blob> blobs = new HashMap<>();
+    HashMap<String, String> blobs = new HashMap<>();
     Commit prev;
     File commitFile;
+    Branch branch = new Branch();
 
     public Commit() {
         timestamp = new Date(0);
@@ -21,12 +20,10 @@ public class Commit implements Serializable {
         commitFile = new File(".gitlet/commit/"+this.toString());
     }
 
-    public Commit(List<Blob> blobs, String message, Commit prev) {
+    public Commit(HashMap<String, String> blobs, String message, Commit prev) {
         timestamp = new Date();
         this.message = message;
-        for(Blob blob: blobs) {
-            this.blobs.put(blob.name, blob);
-        }
+        this.blobs = blobs;
         this.prev = prev;
         commitFile = new File(".gitlet/commit/"+this.toString());
     }
@@ -43,12 +40,24 @@ public class Commit implements Serializable {
         return message;
     }
 
-    public HashMap<String, Blob> getBlobs() {
+    public Branch getBranch() {
+        return this.branch;
+    }
+    public void setBranch(Branch branch) {
+        this.branch = branch;
+        this.saveCommit();
+    }
+
+    public HashMap<String, String> getBlobs() {
         return blobs;
     }
 
-    public Commit readCommit(String str) {
-        return new Commit();
+    public static Commit readCommit(String str) {
+        return Utils.readObject(new File(".gitlet/commit/"+str), Commit.class);
+    }
+
+    public String getID() {
+        return commitFile.getName();
     }
 
     @Override

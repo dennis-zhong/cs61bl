@@ -2,11 +2,14 @@ package gitlet;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.Objects;
 
 public class Blob implements Serializable {
     String name;
     String contents;
     File blobFile;
+
+    public Blob() {}
 
     public Blob(String name) {
         this.name = name;
@@ -26,15 +29,40 @@ public class Blob implements Serializable {
         return this.blobFile;
     }
 
+    public String getBlobID() {
+        return this.blobFile.getName();
+    }
+
     public static Blob getBlobObj(String name) {
-        if(name == null) {
-            return null;
+        File blobFile = new File(".gitlet/blobs/"+name);
+        if(blobFile.exists()) {
+            return Utils.readObject(blobFile, Blob.class);
+        } else {
+            return new Blob();
         }
-        return Utils.readObject(new File(".gitlet/blobs/"+name), Blob.class);
+    }
+
+    public boolean isEmpty() {
+        return this.equals(new Blob());
     }
 
     public String getContents() {
         return contents;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Blob blob = (Blob) o;
+        return Objects.equals(name, blob.name) &&
+                Objects.equals(contents, blob.contents) &&
+                Objects.equals(blobFile, blob.blobFile);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, contents, blobFile);
     }
 
     @Override

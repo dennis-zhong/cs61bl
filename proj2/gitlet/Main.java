@@ -70,6 +70,9 @@ public class Main {
             case "reset":
                 reset(args);
                 break;
+            case "merge":
+                merge(args);
+                break;
             default:
                 exitWithError("No command with that name exists.");
         }
@@ -226,7 +229,7 @@ public class Main {
         Commit currCom;
         for(File file: COMMIT_FOLDER.listFiles()) {
             currCom = Utils.readObject(file, Commit.class);
-            System.out.println("===\ncommit "+currCom.toString()+
+            System.out.println("===\ncommit "+currCom.getID()+
                     "\nDate: "+formatter.format(currCom.getDate())+"\n"
                     +currCom.getMessage()+"\n");
         }
@@ -241,13 +244,12 @@ public class Main {
             exitWithError("No reason to remove the file");
         }
 
-        newBlob = Blob.getBlobObj(stageFile.getBlobs().get(args[1]));
         if (stageFile.getBlobs().keySet().contains(args[1])) {
-            stageFile.unStage(newBlob);
+            stageFile.unStage(Blob.getBlobObj(stageFile.getBlobs().get(args[1])));
         }
         if(newBlob != null) {
             getRemoved().putOnStage(newBlob);//puts in remove stage
-            File currFile = new File(args[1]);
+            File currFile = new File("./"+args[1]);
             if(currFile.exists()) {
                 currFile.delete();
             }
@@ -323,6 +325,9 @@ public class Main {
             System.out.println(file);
             deleted2.remove(file);
             mod1.remove(file);
+            if(new File("./"+file).exists() && !untracked.contains(file)) {//in case you go to another commit where the removed file isnt, prevents doubling
+                untracked.add(file);
+            }
         }
         System.out.println("\n=== Modifications Not Staged For Commit===");
         deleted1.addAll(deleted2);
@@ -341,6 +346,7 @@ public class Main {
     }
 
     public static void checkout(String[] args) {
+        checkInit();
         Blob overWrite = null;
         File dest = null;
         if (args.length == 3) {
@@ -358,24 +364,10 @@ public class Main {
             } if(getHeadBranch().getFile().equals(br.getFile())) {
                 exitWithError("No need to checkout the current branch");
             }
-            ArrayList<String> untracked = new ArrayList<>();
+            checkUntracked(br.getHead());
             ArrayList<String> tracked = new ArrayList<>();
-            for(File file: CWD.listFiles()) {
-                if(file.isDirectory() || !file.getName().endsWith(".txt")) {//remove the .txt later
-                    continue;
-                }
-                untracked.add(file.getName());
-            } for(String str: getHead().getBlobs().keySet()) {
-                untracked.remove(str);
+            for(String str: getHead().getBlobs().keySet()) {
                 tracked.add(str);
-            } for(String file: getStage().getBlobs().values()) {
-                untracked.remove(Blob.getBlobObj(file).getName());
-            }
-            if(!untracked.isEmpty()) {
-                for(String str: untracked) {
-                    System.out.println(str);
-                }
-                exitWithError("There is an untracked file in the way; delete it, or add and commit it first.");
             }
             for(String blob: br.getHead().getBlobs().values()) {
                 Blob currBlob = Blob.getBlobObj(blob);
@@ -400,8 +392,31 @@ public class Main {
         Utils.writeContents(dest, overWrite.getContents());
     }
 
+    public static void checkUntracked(Commit com) {
+        ArrayList<String> untracked = new ArrayList<>();
+        for(String file: com.getBlobs().keySet()) {
+            untracked.add(file);
+        } for(String str: getHead().getBlobs().keySet()) {
+            untracked.remove(str);
+        } for(String file: getStage().getBlobs().values()) {
+            untracked.remove(Blob.getBlobObj(file).getName());
+        } for(int i = 0; i < untracked.size(); i++ ) {
+            if(!new File(untracked.get(i)).exists()) {
+                untracked.remove(untracked.get(i));
+                i--;
+            }
+        }
+        if(!untracked.isEmpty()) {
+                /*for(String str: untracked) {
+                    System.out.println(str);
+                }*/
+            exitWithError("There is an untracked file in the way; delete it, or add and commit it first.");
+        }
+    }
+
     public static void branch(String[] args) {
         validateNumArgs(args, 2);
+        checkInit();
         if(new File(".gitlet/branches/"+args[1]).exists()) {
             exitWithError("A branch with that name already exists.");
         }
@@ -412,6 +427,7 @@ public class Main {
 
     public static void removeBranch(String[] args) {
         validateNumArgs(args, 2);
+        checkInit();
         File branchFile = new File(".gitlet/branches/"+args[1]);
         if(!branchFile.exists()) {
             exitWithError("A branch with that name does not exist.");
@@ -424,10 +440,131 @@ public class Main {
 
     public static void reset(String[] args) {
         validateNumArgs(args, 2);
+        checkInit();
         Commit curr = getComFromFile(args[1]);
+        checkUntracked(curr);
         for(String str: curr.getBlobs().values()) {
-            Blob.getBlobObj(str);
+            Blob currB = Blob.getBlobObj(str);
+            File CWDfile = new File("./"+currB.getName());
+            if(!(CWDfile).exists()) {
+                getRemoved().putOnStage(currB);
+            } else {
+                Utils.writeContents(CWDfile, currB.getContents());
+            }
         }
+        Branch br = getHeadBranch();
+        br.setHead(curr);
+        setHead(br);
+        getStage().emptyStage();
+    }
+
+    public static void merge(String[] args) {
+        validateNumArgs(args, 2);
+        checkInit();
+        if(!getStage().isEmpty() || !getRemoved().isEmpty()) {
+            exitWithError("You have uncommitted changes.");
+        }
+        Branch br = Branch.getBranch(args[1]);
+        if(br == null) {
+            exitWithError("A branch with that name does not exist.");
+        }
+        if(br.getName().equals(getHeadBranch().getName())) {
+            exitWithError("Cannot merge a branch with itself.");
+        }
+        checkUntracked(br.getHead());
+        Commit LCA = getLCA(br);
+        if(LCA.equals(getHead())) {
+            checkout(new String[]{"checkout", br.getName()});
+            System.out.println("Current branch fast-forwarded.");
+            return;
+        }
+        if(LCA.equals(br.getHead())) {
+            exitWithError("Given branch is an ancestor of the current branch.");
+        }
+        /*
+        HashMap<String, String> modifiedH = new HashMap<>();
+        HashMap<String, String> modifiedB = new HashMap<>();
+        HashMap<String, String> notModifiedH = new HashMap<>();
+        HashMap<String, String> notModifiedB = new HashMap<>();
+
+        for(String id: getHead().getBlobs().values()) {
+            Blob curr = Blob.getBlobObj(id);
+            if(Blob.getBlobObj(LCA.getBlobs().get(curr.getName()))
+                    .equals(curr.getContents())) {
+                modifiedH.put(curr.getName(), id);
+            } else {
+                notModifiedH.put(curr.getName(), id);
+            }
+        }*/
+        ArrayList<String> everyFile = new ArrayList<>();
+        for(String blob: getHead().getBlobs().keySet()) {
+            everyFile.add(blob);
+        }
+        for(String blob: br.getHead().getBlobs().keySet()) {
+            if(!everyFile.contains(blob)) {
+                everyFile.add(blob);
+            }
+        }
+        for(String blob: LCA.getBlobs().keySet()) {
+            if(!everyFile.contains(blob)) {
+                everyFile.add(blob);
+            }
+        }
+        Blob headBlob;
+        Blob brBlob;
+        Blob comBlob;
+        boolean conflict = false;
+        for(String file: everyFile) {
+            headBlob = Blob.getBlobObj(getHead().getBlobs().get(file));
+            brBlob = Blob.getBlobObj(br.getHead().getBlobs().get(file));
+            comBlob = Blob.getBlobObj(LCA.getBlobs().get(file));
+            if(comBlob.isEmpty() && headBlob.isEmpty() && !brBlob.isEmpty()) {
+                checkout(new String[]{"checkout", br.getHead().getID(), "--", file});
+                getStage().putOnStage(brBlob);
+            } else if(comBlob.equals(headBlob) && brBlob.isEmpty()) {
+                remove(new String[]{"remove", file});//needs to be untracked?
+            } else if(!brBlob.equals(comBlob) && comBlob.equals(headBlob)) {
+                checkout(new String[]{"checkout", br.getHead().getID(), "--", file});
+                getStage().putOnStage(brBlob);
+            } else if (brBlob.equals(comBlob) && !comBlob.equals(headBlob)) {
+                //dont do anything
+                continue;
+            } else if (brBlob.equals(headBlob) && !brBlob.equals(comBlob)) {
+                //should you untrack a removed file/save the fact it was removed in a commit
+                continue;
+            } else if (comBlob.isEmpty() && brBlob.isEmpty() && !headBlob.isEmpty()) {
+                continue;
+            } else if(!brBlob.isEmpty() && !headBlob.equals(brBlob)) {
+                Utils.writeContents(headBlob.getBlobFile(),
+                        "<<<<<<< HEAD\n"+headBlob.getContents()+
+                        "======="+brBlob.getContents()+">>>>>>>");
+                conflict = true;
+                headBlob.saveBlob();
+                getStage().putOnStage(headBlob);
+            }
+        }
+        commit(new String[]{"commit", "Merged "+br+" into "+getHeadBranch()});
+        if(conflict) {
+            System.out.println("Encountered a merge conflict");
+        }
+        getHead().setPrev2(br.getHead());
+        setHead(getHeadBranch());
+    }
+
+    public static Commit getLCA(Branch branch) {
+        Commit currH = getHead();
+        Commit compare = branch.getHead();
+        while(currH.prev != null) {
+            while(compare.prev != null) {
+                if(currH.getID().equals(compare.getID())) {
+                    return currH;
+                }
+                compare = compare.prev;
+            }
+            compare = branch.getHead();
+            currH = currH.prev;
+        }
+        return currH;
     }
 
     /**

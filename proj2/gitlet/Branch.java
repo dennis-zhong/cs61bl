@@ -25,6 +25,10 @@ public class Branch implements Serializable {
         branchFile = new File(".gitlet/branches/"+name);
     }
 
+    public String getName(){
+        return name;
+    }
+
     public void setHead(Commit com) {
         comBranch.put(com.getID(), com);
         head = com;

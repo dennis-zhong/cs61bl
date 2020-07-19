@@ -11,6 +11,7 @@ public class Commit implements Serializable {
     String message;
     HashMap<String, String> blobs = new HashMap<>();
     Commit prev;
+    Commit prev2;
     File commitFile;
 
     public Commit() {
@@ -39,6 +40,15 @@ public class Commit implements Serializable {
         return message;
     }
 
+    public Commit getPrev2() {
+        return prev2;
+    }
+
+    public void setPrev2(Commit com) {
+        this.prev2 = com;
+        saveCommit();
+    }
+
     public HashMap<String, String> getBlobs() {
         return blobs;
     }
@@ -49,6 +59,27 @@ public class Commit implements Serializable {
 
     public String getID() {
         return commitFile.getName();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Commit commit = (Commit) o;
+        return Objects.equals(timestamp, commit.timestamp) &&
+                Objects.equals(message, commit.message) &&
+                Objects.equals(blobs, commit.blobs) &&
+                Objects.equals(prev, commit.prev) &&
+                Objects.equals(commitFile, commit.commitFile);
+    }
+
+    public static Commit findLCA(Commit head, Commit compare, int depth) {
+        return new Commit();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(timestamp, message, blobs, prev, commitFile);
     }
 
     @Override

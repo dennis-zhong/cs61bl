@@ -27,6 +27,10 @@ public class Stage implements Serializable {
         this.saveStage();
     }
 
+    public boolean isEmpty() {
+        return blobs.isEmpty();
+    }
+
     public void saveStage() {
         Utils.writeObject(new File(".gitlet/"+name), this);
     }

@@ -61,6 +61,60 @@ public class Commit implements Serializable {
         return commitFile.getName();
     }
 
+    public static Commit findLCA(Commit head, Commit compare) {
+        HashMap<String, Commit> ancestors = collectAncestors(head, compare, new HashMap<String, Commit>());
+        int shortest = Integer.MAX_VALUE;
+        Commit save = null;
+        int dist;
+        for(Commit curr: ancestors.values()) {
+            dist = calcDist(head, curr, 0);
+            if(dist<shortest) {
+                shortest = dist;
+                save = curr;
+            }
+        }
+        return save;
+    }
+
+    public static HashMap<String, Commit> collectAncestors(Commit head, Commit comp, HashMap<String, Commit> collective) {
+        if(head.equals(new Commit()) || comp.equals(new Commit())) {
+            collective.put(new Commit().getID(), new Commit());
+            return collective;
+        } else if(head.getID().equals(comp.getID())) {
+            collective.put(head.getID(), head);
+            return collective;
+        } else {
+            HashMap<String, Commit> comps1 = collectAncestors(head.prev, comp.prev, collective);
+            HashMap<String, Commit> comps2 = collectAncestors(head, comp.prev, collective);
+            HashMap<String, Commit> comps3 = collectAncestors(head.prev, comp, collective);
+            collective.putAll(comps1);
+            collective.putAll(comps2);
+            collective.putAll(comps3);
+            if(head.prev2 != null) {
+                HashMap<String, Commit> comps4 = collectAncestors(head.prev2, comp, collective);
+                collective.putAll(comps4);
+            }
+            if(comp.prev2 != null) {
+                collective.putAll(collectAncestors(head, comp.prev2, collective));
+            }
+            return collective;
+        }
+    }
+
+    public static int calcDist(Commit start, Commit end, int depth) {
+        if(start.equals(new Commit()) || start.equals(end)) {
+            return depth;
+        } else {
+            int first = calcDist(start.prev, end, depth++);
+            if(start.prev2 != null) {
+                int second = calcDist(start.prev2, end, depth++);
+                return Math.min(first, second);
+            }
+            return first;
+        }
+
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -70,11 +124,8 @@ public class Commit implements Serializable {
                 Objects.equals(message, commit.message) &&
                 Objects.equals(blobs, commit.blobs) &&
                 Objects.equals(prev, commit.prev) &&
+                Objects.equals(prev2, commit.prev2) &&
                 Objects.equals(commitFile, commit.commitFile);
-    }
-
-    public static Commit findLCA(Commit head, Commit compare, int depth) {
-        return new Commit();
     }
 
     @Override

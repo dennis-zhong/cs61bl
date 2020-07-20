@@ -50,6 +50,12 @@ public class Blob implements Serializable {
         return contents;
     }
 
+    public void setContents(String contents) {
+        this.contents = contents;
+        Utils.writeContents(new File(name), contents);
+        this.saveBlob();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

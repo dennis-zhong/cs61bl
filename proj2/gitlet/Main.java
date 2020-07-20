@@ -148,18 +148,21 @@ public class Main {
 
     public static void commit(String[] args) {
         checkInit();
-        if(getStage().getBlobs().isEmpty()) {
-            exitWithError("No changes added to the commit");
+        if(getStage().getBlobs().isEmpty() && getRemoved().getBlobs().isEmpty()) {
+            exitWithError("No changes added to the commit.");
         }
-        if (args.length == 1) {
-            exitWithError("Please enter a commit message");
+        if(args.length == 1) {
+            exitWithError("Please enter a commit message.");
         }
         validateNumArgs(args, 2);
 
         HashMap<String, String> newBlobs = getHead().getBlobs();
-        for (Blob blob: getStage().getBlobs().values().stream()
-                .map(x->Utils.readObject(new File(".gitlet/blobs/"+x), Blob.class)).collect(Collectors.toList())) {
+        for(Blob blob: getStage().getBlobs().values().stream()
+                .map(x->Blob.getBlobObj(x)).collect(Collectors.toList())) {
             newBlobs.put(blob.getName(), blob.getBlobFile().getName());
+        }
+        for(String str: getRemoved().getBlobs().values()) {
+            newBlobs.remove(Blob.getBlobObj(str).getName());
         }
         Commit com = new Commit(newBlobs, args[1], getHead());
         Branch currBranch = getHeadBranch();
@@ -167,6 +170,7 @@ public class Main {
         currBranch.setHead(com);
         setHead(currBranch);
         getStage().emptyStage();
+        getRemoved().emptyStage();
     }
 
     public static Commit getHead() {
@@ -188,6 +192,7 @@ public class Main {
     public static Stage getRemoved() {
         return Utils.readObject(REMOVE_FOLDER, Stage.class);
     }
+
     public static Commit getComFromFile(String name){
         File file = new File(".gitlet/commit/"+name);
         Commit currCom = null;
@@ -214,9 +219,13 @@ public class Main {
         SimpleDateFormat formatter = new SimpleDateFormat("E MMM d HH:mm:ss y Z");
         formatter.setTimeZone(TimeZone.getTimeZone("GMT-800"));
         while (currCom != null) {
-            System.out.println("===\ncommit "+currCom.getID()+
-                    "\nDate: "+formatter.format(currCom.getDate())+"\n"
-                    +currCom.getMessage()+"\n");
+            System.out.print("===\ncommit "+currCom.getID());
+            if(currCom.prev2 != null) {
+                System.out.print("Merge: "+currCom.prev.getID().substring(0, 7)
+                        +" "+currCom.prev2.getID().substring(0, 7));
+            }
+            System.out.print("\nDate: "+formatter.format(currCom.getDate()));
+            System.out.print("\n"+currCom.getMessage()+"\n\n");
             currCom = currCom.prev;
         }
     }
@@ -229,9 +238,13 @@ public class Main {
         Commit currCom;
         for(File file: COMMIT_FOLDER.listFiles()) {
             currCom = Utils.readObject(file, Commit.class);
-            System.out.println("===\ncommit "+currCom.getID()+
-                    "\nDate: "+formatter.format(currCom.getDate())+"\n"
-                    +currCom.getMessage()+"\n");
+            System.out.print("===\ncommit "+currCom.getID());
+            if(currCom.prev2 != null) {
+                System.out.print("Merge: "+currCom.prev.getID().substring(0, 7)
+                        +" "+currCom.prev2.getID().substring(0, 7));
+            }
+            System.out.print("\nDate: "+formatter.format(currCom.getDate()));
+            System.out.print("\n"+currCom.getMessage()+"\n\n");
         }
     }
 
@@ -240,14 +253,14 @@ public class Main {
         checkInit();
         Stage stageFile = getStage();
         Blob newBlob = Blob.getBlobObj(getHead().getBlobs().get(args[1]));//finds blob in head com
-        if(newBlob == null && !stageFile.getBlobs().keySet().contains(args[1])) {
+        if(newBlob.isEmpty() && !stageFile.getBlobs().keySet().contains(args[1])) {
             exitWithError("No reason to remove the file");
         }
 
         if (stageFile.getBlobs().keySet().contains(args[1])) {
             stageFile.unStage(Blob.getBlobObj(stageFile.getBlobs().get(args[1])));
         }
-        if(newBlob != null) {
+        if(!newBlob.isEmpty()) {
             getRemoved().putOnStage(newBlob);//puts in remove stage
             File currFile = new File("./"+args[1]);
             if(currFile.exists()) {
@@ -259,11 +272,16 @@ public class Main {
     public static void find(String[] args) {
         validateNumArgs(args, 2);
         checkInit();
+        int i = 0;
         for(File file: COMMIT_FOLDER.listFiles()) {
             Commit com = Utils.readObject(file, Commit.class);
             if(com.getMessage().equals(args[1])) {
                 System.out.println(com.getID());
+                i++;
             }
+        }
+        if(i==0) {
+            exitWithError("Found no commit with that message.");
         }
     }
 
@@ -347,8 +365,8 @@ public class Main {
 
     public static void checkout(String[] args) {
         checkInit();
-        Blob overWrite = null;
-        File dest = null;
+        Blob overWrite;
+        File dest;
         if (args.length == 3) {
             overWrite = Blob.getBlobObj(getHead().getBlobs().get(args[2]));
             dest = new File("./" + args[2]);
@@ -372,21 +390,19 @@ public class Main {
             for(String blob: br.getHead().getBlobs().values()) {
                 Blob currBlob = Blob.getBlobObj(blob);
                 File currFile = new File("./"+currBlob.getName());
-                if (currFile.exists()) {
-                    Utils.writeContents(currFile, currBlob.getContents());
-                    tracked.remove(currBlob.getName());
-                }
+                tracked.remove(currBlob.getName());
+                Utils.writeContents(currFile, currBlob.getContents());
             }
             setHead(br);
             for(String str: tracked) {//delete files in curr dir that r tracked in previous commit
-                if(!br.getHead().getBlobs().keySet().contains(str)) {
-                    new File("./"+str).delete();
-                }
+                new File("./" + str).delete();
+                //if(!br.getHead().getBlobs().keySet().contains(str)) {
+                //}
             }
             getStage().emptyStage();
             return;
         }
-        if (overWrite == null) {
+        if (overWrite.isEmpty()) {
             exitWithError("File does not exist in that commit.");
         }
         Utils.writeContents(dest, overWrite.getContents());
@@ -472,7 +488,12 @@ public class Main {
             exitWithError("Cannot merge a branch with itself.");
         }
         checkUntracked(br.getHead());
-        Commit LCA = getLCA(br);
+        Commit LCA = Commit.findLCA(getHead(), br.getHead());//getLCA(br);
+        /*Commit testLCA = Commit.findLCA(getHead(), br.getHead());
+        System.out.println(testLCA.getID());
+        if(testLCA.equals(LCA)) {
+            System.out.println("itwork");
+        }*/
         if(LCA.equals(getHead())) {
             checkout(new String[]{"checkout", br.getName()});
             System.out.println("Current branch fast-forwarded.");
@@ -535,11 +556,10 @@ public class Main {
             } else if (comBlob.isEmpty() && brBlob.isEmpty() && !headBlob.isEmpty()) {
                 continue;
             } else if(!brBlob.isEmpty() && !headBlob.equals(brBlob)) {
-                Utils.writeContents(headBlob.getBlobFile(),
-                        "<<<<<<< HEAD\n"+headBlob.getContents()+
-                        "======="+brBlob.getContents()+">>>>>>>");
+                headBlob.setContents("<<<<<<< HEAD\n"
+                        +headBlob.getContents()+"======="
+                        +brBlob.getContents()+">>>>>>>");
                 conflict = true;
-                headBlob.saveBlob();
                 getStage().putOnStage(headBlob);
             }
         }
@@ -547,11 +567,14 @@ public class Main {
         if(conflict) {
             System.out.println("Encountered a merge conflict");
         }
-        getHead().setPrev2(br.getHead());
-        setHead(getHeadBranch());
+        Branch newbr = getHeadBranch();
+        newbr.getHead().setPrev2(br.getHead());
+        setHead(newbr);
+        //System.out.println(getHead().prev);
+        //System.out.println(getHead().prev2);
     }
 
-    public static Commit getLCA(Branch branch) {
+    public static Commit getLCA(Branch branch) {//bad LCA
         Commit currH = getHead();
         Commit compare = branch.getHead();
         while(currH.prev != null) {

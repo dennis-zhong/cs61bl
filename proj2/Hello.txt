@@ -1,1 +1,10 @@
-hello this the real
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+master2=======<<<<<<< HEAD
+branch1=======master1>>>>>>>>>>>>>>
+master4=======<<<<<<< HEAD
+branch1=======master1>>>>>>>
+branch3>>>>>>>=======<<<<<<< HEAD
+branch1=======master1>>>>>>>
+branch3>>>>>>>

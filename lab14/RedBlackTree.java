@@ -21,15 +21,33 @@ public class RedBlackTree<T extends Comparable<T>> {
             return null;
         }
 
-        if (r.getItemCount() == 1) {
+        if (r.getItemCount() == 1) {//just becomes a black node
             // TODO: Replace with code to create a 2 node equivalent
-            return null
+            RBTreeNode<T> root = new RBTreeNode<T>(true, r.getItemAt(0));
+            root.left = buildRedBlackTree(r.getChildAt(0));
+            root.right = buildRedBlackTree(r.getChildAt(1));
+            return root;
         } else if (r.getItemCount() == 2) {
             // TODO: Replace with code to create a 3 node equivalent
-            return null
+            RBTreeNode<T> root = new RBTreeNode<T>(true, r.getItemAt(1));
+            RBTreeNode<T> root2 = new RBTreeNode<T>(false, r.getItemAt(0));
+            root.left = root2;
+            root.left.left = buildRedBlackTree(r.getChildAt(0));
+            root.left.right = buildRedBlackTree(r.getChildAt(1));
+            root.right = buildRedBlackTree(r.getChildAt(2));
+            return root;
         } else {
             // TODO: Replace with code to create a 4 node equivalent
-            return null
+            RBTreeNode<T> root = new RBTreeNode<T>(true, r.getItemAt(1));
+            RBTreeNode<T> root2 = new RBTreeNode<T>(false, r.getItemAt(0));
+            RBTreeNode<T> root3 = new RBTreeNode<T>(false, r.getItemAt(2));
+            root.left = root2;
+            root.right = root3;
+            root.left.left = buildRedBlackTree(r.getChildAt(0));
+            root.left.right = buildRedBlackTree(r.getChildAt(1));
+            root.right.left = buildRedBlackTree(r.getChildAt(2));
+            root.right.right = buildRedBlackTree(r.getChildAt(3));
+            return root;
         }
     }
 
@@ -45,14 +63,28 @@ public class RedBlackTree<T extends Comparable<T>> {
        this subtree. */
     RBTreeNode<T> rotateRight(RBTreeNode<T> node) {
         // TODO: YOUR CODE HERE
-        return null;
+        RBTreeNode<T> temp = node;
+        RBTreeNode<T> temp2 = node.left.right;
+        node = node.left;
+        node.isBlack = temp.isBlack;
+        node.right = temp;
+        node.right.isBlack = false;
+        node.right.left = temp2;
+        return node;
     }
 
     /* Rotates the given node NODE to the left. Returns the new root node of
        this subtree. */
     RBTreeNode<T> rotateLeft(RBTreeNode<T> node) {
         // TODO: YOUR CODE HERE
-        return null;
+        RBTreeNode<T> temp = node;
+        RBTreeNode<T> temp2 = node.right.left;
+        node = node.right;
+        node.isBlack = temp.isBlack;
+        node.left = temp;
+        node.left.isBlack = false;
+        node.left.right = temp2;
+        return node;
     }
 
     public void insert(T item) {   
@@ -62,7 +94,35 @@ public class RedBlackTree<T extends Comparable<T>> {
 
     private RBTreeNode<T> insert(RBTreeNode<T> node, T item) {
         // TODO: YOUR CODE HERE
-        return null;
+        if(node.item == null) {
+            return new RBTreeNode<>(false, item);
+        } else if(item.compareTo(node.item)<0) {
+            node.left = insert(node.left, item);
+        } else {
+            node.right = insert(node.right, item);
+        }
+        return restore(node, item);
+    }
+
+    private RBTreeNode<T> restore(RBTreeNode<T> node, T item) {
+        if(node.left == null && node.right == null) {
+            return node;
+        } else if (node.isBlack && node.left == null
+                && node.right.item.equals(item)) {
+            return rotateRight(node);
+        } else if (node.isBlack && node.left != null
+                && node.right.item.equals(item)) {
+            flipColors(node);
+            return node;
+        } else if (node.isBlack && !node.left.isBlack
+                && node.left.left.item.equals(item)) {
+            return restore(rotateRight(node), item);
+        } else if (node.isBlack && !node.left.isBlack
+                && node.left.right.item.equals(item)) {
+            return restore(rotateLeft(node), item);
+        } else {
+            return node;
+        }
     }
 
     /* Returns whether the given node NODE is red. Null nodes (children of leaf

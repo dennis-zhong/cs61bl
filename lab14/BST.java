@@ -14,11 +14,34 @@ public class BST<T> {
        and ITER will contain objects that will be the item of each BSTNode. */
     private BSTNode<T> sortedIterToTree(Iterator<T> iter, int N) {
         // TODO: YOUR CODE HERE
-        return null;
+        if(N == 0) {
+            return new BSTNode<>(null);
+        }
+        return sortedIterToTreeHelper(iter, N, (N-1)/2, new BSTNode<>(null));
+    }
+
+    private BSTNode<T> sortedIterToTreeHelper(Iterator<T> iter, int N, int start, BSTNode<T> node) {
+        if(N == 1) {
+            return new BSTNode<>(iter.next());
+        } else if(N == 2) {
+            node.left = new BSTNode<>(iter.next());
+            node.item = iter.next();
+            return node;
+        } else if(N == 3) {
+            node.left = new BSTNode<>(iter.next());
+            node.item = iter.next();
+            node.right = new BSTNode<>(iter.next());
+            return node;
+        } else {
+            node.left = sortedIterToTreeHelper(iter, N/2, N/4, new BSTNode<>(null));
+            node.item = iter.next();
+            node.right = sortedIterToTreeHelper(iter, (N-1)/2, 3*N/4, new BSTNode<>(null));
+            return node;
+        }
     }
 
     /* Prints the tree represented by ROOT. */
-    private void print() {
+    public void print() {
         print(root, 0);
     }
 

@@ -120,10 +120,15 @@ public class Main {
     public static void addFile(String[] args) {
         validateNumArgs(args, 2);
         checkInit();
-        if (!(new File("./"+args[1]).exists())) {
+        if (!(new File("./"+args[1]).exists())) {//has to be in cwd to add
             exitWithError("File does not exist");
         }
-
+        if(getRemoved().getBlobs().get(args[1]) != null) {
+            Blob temp = new Blob();
+            temp.name = args[1];
+            getRemoved().unStage(temp);
+            return;
+        }
         Blob newBlob = new Blob(args[1]);
         Stage staging = Utils.readObject(new File(".gitlet/stage"), Stage.class);
         if(checkDiffBlob(newBlob)) {
@@ -459,14 +464,20 @@ public class Main {
         checkInit();
         Commit curr = getComFromFile(args[1]);
         checkUntracked(curr);
-        for(String str: curr.getBlobs().values()) {
-            Blob currB = Blob.getBlobObj(str);
-            File CWDfile = new File("./"+currB.getName());
-            if(!(CWDfile).exists()) {
-                getRemoved().putOnStage(currB);
-            } else {
-                Utils.writeContents(CWDfile, currB.getContents());
-            }
+        ArrayList<String> tracked = new ArrayList<>();
+        for(String str: getHead().getBlobs().keySet()) {
+            tracked.add(str);
+        }
+        for(String blob: curr.getBlobs().values()) {
+            Blob currBlob = Blob.getBlobObj(blob);
+            File currFile = new File("./"+currBlob.getName());
+            tracked.remove(currBlob.getName());
+            Utils.writeContents(currFile, currBlob.getContents());
+        }
+        for(String str: tracked) {//delete files in curr dir that r tracked in previous commit
+            new File("./" + str).delete();
+            //if(!br.getHead().getBlobs().keySet().contains(str)) {
+            //}
         }
         Branch br = getHeadBranch();
         br.setHead(curr);

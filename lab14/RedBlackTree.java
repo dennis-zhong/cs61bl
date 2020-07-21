@@ -88,7 +88,7 @@ public class RedBlackTree<T extends Comparable<T>> {
     }
 
     public void insert(T item) {   
-        root = insert(root, item);  
+        root = insert(root, item);
         root.isBlack = true;    
     }
 
@@ -105,22 +105,28 @@ public class RedBlackTree<T extends Comparable<T>> {
     }
 
     private RBTreeNode<T> restore(RBTreeNode<T> node, T item) {
-        if(node.left == null && node.right == null) {
-            return node;
-        } else if (node.isBlack && node.left == null
-                && node.right.item.equals(item)) {
-            return rotateRight(node);
-        } else if (node.isBlack && node.left != null
-                && node.right.item.equals(item)) {
-            flipColors(node);
-            return node;
-        } else if (node.isBlack && !node.left.isBlack
-                && node.left.left.item.equals(item)) {
-            return restore(rotateRight(node), item);
-        } else if (node.isBlack && !node.left.isBlack
-                && node.left.right.item.equals(item)) {
-            return restore(rotateLeft(node), item);
-        } else {
+        try {
+            if(node.left == null && node.right == null) {
+                return node;
+            } else if (node.isBlack && node.left == null
+                    && node.right.item.equals(item)) {
+                return rotateRight(node);
+            } else if (node.isBlack && node.left != null
+                    && node.right.item.equals(item)) {
+                flipColors(node);
+                return node;
+            } else if (node.isBlack && !node.left.isBlack
+                    && node.left.left.item.equals(item)) {
+                return restore(rotateRight(node), item);
+            } else if (node.isBlack && !node.left.isBlack
+                    && node.left.right.item.equals(item)) {
+                return restore(rotateLeft(node), item);
+            } else if (node.item.compareTo(item)<0){
+                return restore(node.right, item);
+            } else {
+                return restore(node.left, item);
+            }
+        } catch (NullPointerException e) {
             return node;
         }
     }

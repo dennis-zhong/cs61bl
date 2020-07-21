@@ -15,7 +15,7 @@ public class BST<T> {
     private BSTNode<T> sortedIterToTree(Iterator<T> iter, int N) {
         // TODO: YOUR CODE HERE
         if(N == 0) {
-            return new BSTNode<>(null);
+            return null;
         }
         return sortedIterToTreeHelper(iter, N, (N-1)/2, new BSTNode<>(null));
     }

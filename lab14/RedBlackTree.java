@@ -109,17 +109,17 @@ public class RedBlackTree<T extends Comparable<T>> {
             if(node.left == null && node.right == null) {
                 return node;
             } else if (node.isBlack && node.left == null
-                    && node.right.item.equals(item)) {
-                return rotateRight(node);
+                    && item.equals(node.right.item)) {
+                return rotateLeft(node);
             } else if (node.isBlack && node.left != null
-                    && node.right.item.equals(item)) {
+                    && item.equals(node.right.item)) {
                 flipColors(node);
                 return node;
             } else if (node.isBlack && !node.left.isBlack
-                    && node.left.left.item.equals(item)) {
+                    && item.equals(node.left.left.item)) {
                 return restore(rotateRight(node), item);
             } else if (node.isBlack && !node.left.isBlack
-                    && node.left.right.item.equals(item)) {
+                    && item.equals(node.left.right.item)) {
                 return restore(rotateLeft(node), item);
             } else if (node.item.compareTo(item)<0){
                 return restore(node.right, item);

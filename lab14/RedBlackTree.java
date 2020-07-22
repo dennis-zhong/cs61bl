@@ -106,25 +106,17 @@ public class RedBlackTree<T extends Comparable<T>> {
 
     private RBTreeNode<T> restore(RBTreeNode<T> node, T item) {
         try {
-            if(node.left == null && node.right == null) {
-                return node;
-            } else if (node.isBlack && node.left == null
-                    && item.equals(node.right.item)) {
-                return rotateLeft(node);
-            } else if (node.isBlack && node.left != null
-                    && item.equals(node.right.item)) {
+            if (!isRed(node.left)
+                    && isRed(node.right)) {
+                return restore(rotateLeft(node), item);
+            } else if (node.isBlack && isRed(node.left)
+                    && isRed(node.right)) {
                 flipColors(node);
                 return node;
-            } else if (node.isBlack && !node.left.isBlack
-                    && item.equals(node.left.left.item)) {
+            } else if (isRed(node.left) && isRed(node.left.left)) {
                 return restore(rotateRight(node), item);
-            } else if (node.isBlack && !node.left.isBlack
-                    && item.equals(node.left.right.item)) {
-                return restore(rotateLeft(node), item);
-            } else if (node.item.compareTo(item)<0){
-                return restore(node.right, item);
             } else {
-                return restore(node.left, item);
+                return node;
             }
         } catch (NullPointerException e) {
             return node;

@@ -2,10 +2,8 @@ package gitlet;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /** Driver class for Gitlet, the tiny stupid version-control system.
@@ -24,7 +22,6 @@ public class Main {
     static final File REMOVE_FOLDER = new File(".gitlet/removeStage");
     static final File BRANCH_FOLDER = new File(".gitlet/branches");
     static final File HEAD = new File(".gitlet/HEAD");
-    static final File BRANCH_POINTER = new File(".gitlet/currB");
 
     /** Usage: java gitlet.Main ARGS, where ARGS contains
      *  <COMMAND> <OPERAND> .... */
@@ -121,7 +118,7 @@ public class Main {
         validateNumArgs(args, 2);
         checkInit();
         if (!(new File("./"+args[1]).exists())) {//has to be in cwd to add
-            exitWithError("File does not exist");
+            exitWithError("File does not exist.");
         }
         if(getRemoved().getBlobs().get(args[1]) != null) {
             Blob temp = new Blob();
@@ -134,7 +131,6 @@ public class Main {
         if(checkDiffBlob(newBlob)) {
             newBlob.saveBlob();
             staging.putOnStage(newBlob);
-            staging.saveStage();
         } else {
             staging.unStage(newBlob);
         }
@@ -156,10 +152,10 @@ public class Main {
         if(getStage().getBlobs().isEmpty() && getRemoved().getBlobs().isEmpty()) {
             exitWithError("No changes added to the commit.");
         }
-        if(args.length == 1) {
+        validateNumArgs(args, 2);
+        if(args[1].equals("")) {
             exitWithError("Please enter a commit message.");
         }
-        validateNumArgs(args, 2);
 
         HashMap<String, String> newBlobs = getHead().getBlobs();
         for(Blob blob: getStage().getBlobs().values().stream()
@@ -259,7 +255,7 @@ public class Main {
         Stage stageFile = getStage();
         Blob newBlob = Blob.getBlobObj(getHead().getBlobs().get(args[1]));//finds blob in head com
         if(newBlob.isEmpty() && !stageFile.getBlobs().keySet().contains(args[1])) {
-            exitWithError("No reason to remove the file");
+            exitWithError("No reason to remove the file.");
         }
 
         if (stageFile.getBlobs().keySet().contains(args[1])) {
@@ -301,7 +297,6 @@ public class Main {
             }
             System.out.println(br);
         }
-        System.out.println("\n=== Staged Files ===");
         HashSet<String> mod1 = new HashSet<>();//cond 1
         HashSet<String> mod2 = new HashSet<>();//cond 2
         HashSet<String> stagedFiles = new HashSet<>();
@@ -329,6 +324,7 @@ public class Main {
         for(String str: getHead().getBlobs().keySet()) {
             untracked.remove(str);
         }
+        System.out.println("\n=== Staged Files ===");
         for(String file: getStage().getBlobs().values()) {
             Blob curr = Blob.getBlobObj(file);
             System.out.println(curr.getName());
@@ -352,7 +348,7 @@ public class Main {
                 untracked.add(file);
             }
         }
-        System.out.println("\n=== Modifications Not Staged For Commit===");
+        System.out.println("\n=== Modifications Not Staged For Commit ===");
         deleted1.addAll(deleted2);
         List<String> deletedLst = deleted1.stream().map(x->x+" (deleted)").sorted().collect(Collectors.toList());
         mod1.addAll(mod2);
@@ -372,10 +368,18 @@ public class Main {
         checkInit();
         Blob overWrite;
         File dest;
-        if (args.length == 3) {
+        if (args.length == 3) {//we check --
+            validateNumArgs(args, 3);
+            if(!args[1].equals("--")) {
+                exitWithError("Incorrect operands.");
+            }
             overWrite = Blob.getBlobObj(getHead().getBlobs().get(args[2]));
             dest = new File("./" + args[2]);
-        } else if (args.length == 4) {
+        } else if (args.length == 4) {//what should be status of checked out files
+            validateNumArgs(args, 4);
+            if(!args[2].equals("--")) {
+                exitWithError("Incorrect operands.");
+            }
             Commit currCom = getComFromFile(args[1]);
             overWrite = Blob.getBlobObj(currCom.getBlobs().get(args[3]));
             dest = new File("./" + args[3]);
@@ -383,9 +387,9 @@ public class Main {
             validateNumArgs(args, 2);
             Branch br = Branch.getBranch(args[1]);
             if(br == null) {
-                exitWithError("No such branch exists");
+                exitWithError("No such branch exists.");
             } if(getHeadBranch().getFile().equals(br.getFile())) {
-                exitWithError("No need to checkout the current branch");
+                exitWithError("No need to checkout the current branch.");
             }
             checkUntracked(br.getHead());
             ArrayList<String> tracked = new ArrayList<>();
@@ -551,32 +555,45 @@ public class Main {
             brBlob = Blob.getBlobObj(br.getHead().getBlobs().get(file));
             comBlob = Blob.getBlobObj(LCA.getBlobs().get(file));
             if(comBlob.isEmpty() && headBlob.isEmpty() && !brBlob.isEmpty()) {
+                //Any files that were not present at the split point and are present only in the given branch should be checked out and staged.
                 checkout(new String[]{"checkout", br.getHead().getID(), "--", file});
                 getStage().putOnStage(brBlob);
             } else if(comBlob.equals(headBlob) && brBlob.isEmpty()) {
+                //Any files present at the split point, unmodified in the current branch, and absent in the given branch should be removed (and untracked).
                 remove(new String[]{"remove", file});//needs to be untracked?
             } else if(!brBlob.equals(comBlob) && comBlob.equals(headBlob)) {
+                //Any files that have been modified in the given branch since the split point, but not modified in the current branch since the split point
                 checkout(new String[]{"checkout", br.getHead().getID(), "--", file});
                 getStage().putOnStage(brBlob);
-            } else if (brBlob.equals(comBlob) && !comBlob.equals(headBlob)) {
-                //dont do anything
+            } else if(comBlob.equals(brBlob) && headBlob.isEmpty()) {
+                //Any files present at the split point, unmodified in the given branch, and absent in the current branch should remain absent.
                 continue;
-            } else if (brBlob.equals(headBlob) && !brBlob.equals(comBlob)) {
+            } else if(brBlob.equals(comBlob) && !comBlob.equals(headBlob)) {
+                //Any files that have been modified in the current branch but not in the given branch since the split point should stay as they are.
+                continue;
+            } else if(brBlob.equals(headBlob) && !brBlob.equals(comBlob)) {
                 //should you untrack a removed file/save the fact it was removed in a commit
+                //Any files that have been modified in both the current and given branch in the same way
                 continue;
-            } else if (comBlob.isEmpty() && brBlob.isEmpty() && !headBlob.isEmpty()) {
+            } else if(comBlob.isEmpty() && brBlob.isEmpty() && !headBlob.isEmpty()) {
                 continue;
-            } else if(!brBlob.isEmpty() && !headBlob.equals(brBlob)) {
-                headBlob.setContents("<<<<<<< HEAD\n"
+            } else if((!comBlob.isEmpty() && (!brBlob.equals(comBlob) && !headBlob.equals(comBlob) && !headBlob.equals(brBlob))
+                    || (brBlob.isEmpty() && !comBlob.equals(headBlob)) || (headBlob.isEmpty() && !comBlob.equals(brBlob)))
+                    || (comBlob.isEmpty() && !brBlob.equals(headBlob))) {
+                Blob newBlob = new Blob();
+                newBlob.name = headBlob.name;
+                newBlob.contents = "<<<<<<< HEAD\n"
                         +headBlob.getContents()+"======="
-                        +brBlob.getContents()+">>>>>>>");
+                        +brBlob.getContents()+">>>>>>>";
+                newBlob.blobFile = new File(".gitlet/blobs/"+newBlob.toString());
+                newBlob.setContents(newBlob.getContents());
                 conflict = true;
-                getStage().putOnStage(headBlob);
+                getStage().putOnStage(newBlob);
             }
         }
-        commit(new String[]{"commit", "Merged "+br+" into "+getHeadBranch()});
+        commit(new String[]{"commit", "Merged "+br+" into "+getHeadBranch()+"."});
         if(conflict) {
-            System.out.println("Encountered a merge conflict");
+            System.out.println("Encountered a merge conflict.");
         }
         Branch newbr = getHeadBranch();
         newbr.getHead().setPrev2(br.getHead());

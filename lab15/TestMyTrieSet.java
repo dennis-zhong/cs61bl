@@ -47,7 +47,6 @@ public class TestMyTrieSet {
         }
 
         List<String> keys = t.keysWithPrefix("sa");
-        System.out.println(keys);
         for (String s: saStrings) {
             assertTrue(keys.contains(s));
         }

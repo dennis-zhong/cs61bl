@@ -325,7 +325,8 @@ public class Main {
             untracked.remove(str);
         }
         System.out.println("\n=== Staged Files ===");
-        for(String file: getStage().getBlobs().keySet()) {
+        for(String file: getStage().getBlobs().values().stream()
+                .sorted().collect(Collectors.toList())) {
             Blob curr = Blob.getBlobObj(file);
             System.out.println(curr.getName());
             untracked.remove(curr.getName());
@@ -555,7 +556,9 @@ public class Main {
             headBlob = Blob.getBlobObj(getHead().getBlobs().get(file));
             brBlob = Blob.getBlobObj(br.getHead().getBlobs().get(file));
             comBlob = Blob.getBlobObj(LCA.getBlobs().get(file));
-            if(comBlob.equals(headBlob) && brBlob.isEmpty()) {
+            if(headBlob.equals(brBlob) && comBlob.equals(brBlob) && comBlob.equals(headBlob)) {
+                continue;
+            } else if(comBlob.equals(headBlob) && brBlob.isEmpty()) {
                 //Any files present at the split point, unmodified in the current branch, and absent in the given branch should be removed (and untracked).
                 remove(new String[]{"remove", file});
             } else if(!headBlob.equals(brBlob) && !brBlob.equals(comBlob)

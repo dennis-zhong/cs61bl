@@ -62,8 +62,7 @@ public class Blob implements Serializable {
         if (o == null || getClass() != o.getClass()) return false;
         Blob blob = (Blob) o;
         return Objects.equals(name, blob.name) &&
-                Objects.equals(contents, blob.contents) &&
-                Objects.equals(blobFile, blob.blobFile);
+                Objects.equals(contents, blob.contents);
     }
 
     @Override

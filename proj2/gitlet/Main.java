@@ -325,8 +325,7 @@ public class Main {
             untracked.remove(str);
         }
         System.out.println("\n=== Staged Files ===");
-        for(String file: getStage().getBlobs().keySet().stream()
-                .sorted().collect(Collectors.toList())) {
+        for(String file: getStage().getBlobs().keySet()) {
             Blob curr = Blob.getBlobObj(file);
             System.out.println(curr.getName());
             untracked.remove(curr.getName());
@@ -341,8 +340,7 @@ public class Main {
             }
         }
         System.out.println("\n=== Removed Files ===");
-        for(String file: getRemoved().getBlobs().keySet().stream()
-                .sorted().collect(Collectors.toList())) {
+        for(String file: getRemoved().getBlobs().keySet()) {
             System.out.println(file);
             deleted2.remove(file);
             mod1.remove(file);
@@ -557,32 +555,29 @@ public class Main {
             headBlob = Blob.getBlobObj(getHead().getBlobs().get(file));
             brBlob = Blob.getBlobObj(br.getHead().getBlobs().get(file));
             comBlob = Blob.getBlobObj(LCA.getBlobs().get(file));
-            if(comBlob.isEmpty() && headBlob.isEmpty() && !brBlob.isEmpty()) {
-                //Any files that were not present at the split point and are present only in the given branch should be checked out and staged.
-                checkout(new String[]{"checkout", br.getHead().getID(), "--", file});
-                getStage().putOnStage(brBlob);
-            } else if(comBlob.equals(headBlob) && brBlob.isEmpty()) {
+            if(comBlob.equals(headBlob) && brBlob.isEmpty()) {
                 //Any files present at the split point, unmodified in the current branch, and absent in the given branch should be removed (and untracked).
                 remove(new String[]{"remove", file});
-            } else if(!brBlob.equals(comBlob) && comBlob.equals(headBlob)) {
+            } else if(!headBlob.equals(brBlob) && !brBlob.equals(comBlob)
+                    && headBlob.equals(comBlob)) {
+                //Any files that were not present at the split point and are present only in the given branch should be checked out and staged.
                 //Any files that have been modified in the given branch since the split point, but not modified in the current branch since the split point
                 checkout(new String[]{"checkout", br.getHead().getID(), "--", file});
                 getStage().putOnStage(brBlob);
-            } else if(comBlob.equals(brBlob) && headBlob.isEmpty()) {
+            } else if(comBlob.equals(brBlob) && !headBlob.equals(brBlob)
+                    && !comBlob.equals(headBlob)) {
                 //Any files present at the split point, unmodified in the given branch, and absent in the current branch should remain absent.
-                continue;
-            } else if(brBlob.equals(comBlob) && !comBlob.equals(headBlob)) {
                 //Any files that have been modified in the current branch but not in the given branch since the split point should stay as they are.
                 continue;
-            } else if(brBlob.equals(headBlob) && !brBlob.equals(comBlob)) {
+            } else if(brBlob.equals(headBlob) && !brBlob.equals(comBlob)
+                    && !headBlob.equals(comBlob)) {
                 //should you untrack a removed file/save the fact it was removed in a commit
                 //Any files that have been modified in both the current and given branch in the same way
                 continue;
             } else if(comBlob.isEmpty() && brBlob.isEmpty() && !headBlob.isEmpty()) {
                 continue;
-            } else if((!comBlob.isEmpty() && (!brBlob.equals(comBlob) && !headBlob.equals(comBlob) && !headBlob.equals(brBlob))
-                    || (brBlob.isEmpty() && !comBlob.equals(headBlob)) || (headBlob.isEmpty() && !comBlob.equals(brBlob)))
-                    || (comBlob.isEmpty() && !brBlob.equals(headBlob))) {
+            } else if(!comBlob.equals(brBlob) && !brBlob.equals(headBlob)
+                    && !comBlob.equals(headBlob)) {
                 Blob newBlob = new Blob();
                 newBlob.name = headBlob.name;
                 newBlob.contents = "<<<<<<< HEAD\n"

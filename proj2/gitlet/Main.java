@@ -263,7 +263,7 @@ public class Main {
         }
         if(!newBlob.isEmpty()) {
             getRemoved().putOnStage(newBlob);//puts in remove stage
-            File currFile = new File("./"+args[1]);
+            File currFile = new File(args[1]);
             if(currFile.exists()) {
                 currFile.delete();
             }
@@ -558,7 +558,8 @@ public class Main {
             comBlob = Blob.getBlobObj(LCA.getBlobs().get(file));
             if(headBlob.equals(brBlob) && comBlob.equals(brBlob) && comBlob.equals(headBlob)) {
                 continue;
-            } else if(comBlob.equals(headBlob) && brBlob.isEmpty()) {
+            } else if(comBlob.equals(headBlob) && brBlob.isEmpty()
+                    && !comBlob.equals(brBlob) && !headBlob.equals(brBlob)) {
                 //Any files present at the split point, unmodified in the current branch, and absent in the given branch should be removed (and untracked).
                 remove(new String[]{"remove", file});
             } else if(!headBlob.equals(brBlob) && !brBlob.equals(comBlob)

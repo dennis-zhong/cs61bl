@@ -105,9 +105,10 @@ public class Commit implements Serializable {
         if(start.equals(new Commit()) || start.equals(end)) {
             return depth;
         } else {
-            int first = calcDist(start.prev, end, depth++);
+            depth+=1;
+            int first = calcDist(start.prev, end, depth);
             if(start.prev2 != null) {
-                int second = calcDist(start.prev2, end, depth++);
+                int second = calcDist(start.prev2, end, depth);
                 return Math.min(first, second);
             }
             return first;

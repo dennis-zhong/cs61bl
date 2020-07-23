@@ -585,7 +585,7 @@ public class Main {
                 newBlob.name = headBlob.name;
                 newBlob.contents = "<<<<<<< HEAD\n"
                         +headBlob.getContents()+"=======\n"
-                        +brBlob.getContents()+">>>>>>>";
+                        +brBlob.getContents()+">>>>>>>\n";
                 newBlob.blobFile = new File(".gitlet/blobs/"+newBlob.toString());
                 newBlob.setContents(newBlob.getContents());
                 conflict = true;

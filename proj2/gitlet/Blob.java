@@ -6,7 +6,7 @@ import java.util.Objects;
 
 public class Blob implements Serializable {
     String name;
-    String contents;
+    String contents = "";
     File blobFile;
 
     public Blob() {}

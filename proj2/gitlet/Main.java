@@ -222,7 +222,7 @@ public class Main {
         while (currCom != null) {
             System.out.print("===\ncommit "+currCom.getID());
             if(currCom.prev2 != null) {
-                System.out.print("Merge: "+currCom.prev.getID().substring(0, 7)
+                System.out.print("\nMerge: "+currCom.prev.getID().substring(0, 7)
                         +" "+currCom.prev2.getID().substring(0, 7));
             }
             System.out.print("\nDate: "+formatter.format(currCom.getDate()));
@@ -241,7 +241,7 @@ public class Main {
             currCom = Utils.readObject(file, Commit.class);
             System.out.print("===\ncommit "+currCom.getID());
             if(currCom.prev2 != null) {
-                System.out.print("Merge: "+currCom.prev.getID().substring(0, 7)
+                System.out.print("\nMerge: "+currCom.prev.getID().substring(0, 7)
                         +" "+currCom.prev2.getID().substring(0, 7));
             }
             System.out.print("\nDate: "+formatter.format(currCom.getDate()));
@@ -290,8 +290,8 @@ public class Main {
         validateNumArgs(args, 1);
         checkInit();
         System.out.println("=== Branches ===");
-        for(File branch: BRANCH_FOLDER.listFiles()) {
-            Branch br = Utils.readObject(branch, Branch.class);
+        for(String branch: Utils.plainFilenamesIn(BRANCH_FOLDER)) {
+            Branch br = Utils.readObject(new File(".gitlet/branches/"+branch), Branch.class);
             if(br.toString().equals(getHeadBranch().toString())) {
                 System.out.print("*");
             }
@@ -325,7 +325,8 @@ public class Main {
             untracked.remove(str);
         }
         System.out.println("\n=== Staged Files ===");
-        for(String file: getStage().getBlobs().values()) {
+        for(String file: getStage().getBlobs().keySet().stream()
+                .sorted().collect(Collectors.toList())) {
             Blob curr = Blob.getBlobObj(file);
             System.out.println(curr.getName());
             untracked.remove(curr.getName());
@@ -340,7 +341,8 @@ public class Main {
             }
         }
         System.out.println("\n=== Removed Files ===");
-        for(String file: getRemoved().getBlobs().keySet()) {
+        for(String file: getRemoved().getBlobs().keySet().stream()
+                .sorted().collect(Collectors.toList())) {
             System.out.println(file);
             deleted2.remove(file);
             mod1.remove(file);
@@ -431,6 +433,7 @@ public class Main {
                 i--;
             }
         }
+        //System.out.println(untracked);
         if(!untracked.isEmpty()) {
                 /*for(String str: untracked) {
                     System.out.println(str);
@@ -502,8 +505,8 @@ public class Main {
         if(br.getName().equals(getHeadBranch().getName())) {
             exitWithError("Cannot merge a branch with itself.");
         }
-        checkUntracked(br.getHead());
         Commit LCA = Commit.findLCA(getHead(), br.getHead());//getLCA(br);
+        checkMergeUntracked(LCA, br.getHead());
         /*Commit testLCA = Commit.findLCA(getHead(), br.getHead());
         System.out.println(testLCA.getID());
         if(testLCA.equals(LCA)) {
@@ -560,7 +563,7 @@ public class Main {
                 getStage().putOnStage(brBlob);
             } else if(comBlob.equals(headBlob) && brBlob.isEmpty()) {
                 //Any files present at the split point, unmodified in the current branch, and absent in the given branch should be removed (and untracked).
-                remove(new String[]{"remove", file});//needs to be untracked?
+                remove(new String[]{"remove", file});
             } else if(!brBlob.equals(comBlob) && comBlob.equals(headBlob)) {
                 //Any files that have been modified in the given branch since the split point, but not modified in the current branch since the split point
                 checkout(new String[]{"checkout", br.getHead().getID(), "--", file});
@@ -583,7 +586,7 @@ public class Main {
                 Blob newBlob = new Blob();
                 newBlob.name = headBlob.name;
                 newBlob.contents = "<<<<<<< HEAD\n"
-                        +headBlob.getContents()+"======="
+                        +headBlob.getContents()+"=======\n"
                         +brBlob.getContents()+">>>>>>>";
                 newBlob.blobFile = new File(".gitlet/blobs/"+newBlob.toString());
                 newBlob.setContents(newBlob.getContents());
@@ -600,6 +603,28 @@ public class Main {
         setHead(newbr);
         //System.out.println(getHead().prev);
         //System.out.println(getHead().prev2);
+    }
+
+    public static void checkMergeUntracked(Commit LCA, Commit br) {
+        ArrayList<String> untracked = new ArrayList<>();
+        for(String file: br.getBlobs().keySet()) {
+            untracked.add(file);
+        } for(String file: LCA.getBlobs().keySet()) {//in case some stuff happens where head loses track, but lca has file
+            if(!untracked.contains(file)) {
+                untracked.add(file);
+            }
+        } for(String str: getHead().getBlobs().keySet()) {
+            untracked.remove(str);
+        } for(int i = 0; i < untracked.size(); i++ ) {//get rid of unnecessary untracked (if file doesn't exist no need to track)
+            if(!new File(untracked.get(i)).exists()) {
+                untracked.remove(untracked.get(i));
+                i--;
+            }
+        }
+        //System.out.println(untracked);
+        if(!untracked.isEmpty()) {
+            exitWithError("There is an untracked file in the way; delete it, or add and commit it first.");
+        }
     }
 
     public static Commit getLCA(Branch branch) {//bad LCA

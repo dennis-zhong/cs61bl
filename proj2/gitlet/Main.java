@@ -687,7 +687,13 @@ public class Main {
         if(!file.exists()) {
             exitWithError("Remote directory not found.");
         }
-        Branch br = Utils.readObject(file, Branch.class);
+        File branchFile = new File(info+"/branches/"+args[2]);
+        Branch br = null;
+        try {
+            br = Utils.readObject(branchFile, Branch.class);
+        } catch (IllegalArgumentException e) {
+            exitWithError("That remote does not have that branch.");
+        }
         Commit currCom = br.getHead();
         boolean inFuture = false;
         int wrongDist = Integer.MAX_VALUE;
@@ -731,10 +737,12 @@ public class Main {
             exitWithError("Remote directory not found.");
         }
         File branchFile = new File(path+"/branches/"+args[2]);
-        if(!branchFile.exists()) {
+        Branch branch = null;
+        try {
+             branch = Utils.readObject(branchFile, Branch.class);
+        } catch (IllegalArgumentException e) {
             exitWithError("That remote does not have that branch.");
         }
-        Branch branch = Utils.readObject(branchFile, Branch.class);
         Commit pointer = branch.getHead();
         File currBranchFile = new File(".gitlet/branches/"+args[1]+"/"+args[2]);
         if(!currBranchFile.exists()) {

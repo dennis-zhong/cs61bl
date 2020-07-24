@@ -750,13 +750,15 @@ public class Main {
          do {
             Utils.writeObject(new File(".gitlet/commit/"+pointer.getID()), pointer);
             for(String blobSHA: pointer.getBlobs().values()) {
-                Blob currBlob = Blob.getBlobObj(blobSHA);
+                Blob currBlob = Utils.readObject(new File(path+"/blobs/"+blobSHA), Blob.class);
+                File copy = new File(".gitlet/blobs/"+blobSHA);
                 try {
-                    currBlob.getBlobFile().createNewFile();
+                    copy.createNewFile();
+                    currBlob.blobFile = copy;
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                Utils.writeObject(currBlob.getBlobFile(), currBlob);
+                Utils.writeObject(copy, currBlob);
             }
             pointer = pointer.prev;
         } while(!pointer.equals(new Commit()));

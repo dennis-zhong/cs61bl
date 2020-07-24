@@ -22,6 +22,7 @@ public class Main {
     static final File REMOVE_FOLDER = new File(".gitlet/removeStage");
     static final File BRANCH_FOLDER = new File(".gitlet/branches");
     static final File HEAD = new File(".gitlet/HEAD");
+    static final File REMOTES = new File(".gitlet/remotes");
 
     /** Usage: java gitlet.Main ARGS, where ARGS contains
      *  <COMMAND> <OPERAND> .... */
@@ -70,6 +71,21 @@ public class Main {
             case "merge":
                 merge(args);
                 break;
+            case "add-remote":
+                addRemote(args);
+                break;
+            case "rm-remote":
+                removeRemote(args);
+                break;
+            case "push":
+                push(args);
+                break;
+            case "fetch":
+                fetch(args);
+                break;
+            case "pull":
+                pull(args);
+                break;
             default:
                 exitWithError("No command with that name exists.");
         }
@@ -83,14 +99,11 @@ public class Main {
             exitWithError("A Gitlet version-control system already exists in the current directory.");
         }
         GITLET_FOLDER.mkdir();
-        //STAGING_FOLDER.mkdir();
         COMMIT_FOLDER.mkdir();
         BLOB_FOLDER.mkdir();
         BRANCH_FOLDER.mkdir();
-        //REMOVE_FOLDER.mkdir();
         try {
             HEAD.createNewFile();
-            //BRANCH_POINTER.createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -102,6 +115,8 @@ public class Main {
 
         Stage stagingFolder = new Stage("stage");
         Stage removeFolder = new Stage("removeStage");
+        RemoteManager remotes = new RemoteManager();
+        remotes.saveRemoteFile();
         stagingFolder.saveStage();
         removeFolder.saveStage();
     }
@@ -626,6 +641,7 @@ public class Main {
         }
     }
 
+    /*
     public static Commit getLCA(Branch branch) {//bad LCA
         Commit currH = getHead();
         Commit compare = branch.getHead();
@@ -640,6 +656,104 @@ public class Main {
             currH = currH.prev;
         }
         return currH;
+    }*/
+
+    public static void addRemote(String[] args) {
+        checkInit();
+        validateNumArgs(args, 3);
+        RemoteManager temp = getRemoteObj();
+        temp.addRemote(args[1], args[2]);
+        temp.saveRemoteFile();
+    }
+
+    public static RemoteManager getRemoteObj() {
+        return Utils.readObject(REMOTES, RemoteManager.class);
+    }
+
+    public static void removeRemote(String[] args) {
+        checkInit();
+        validateNumArgs(args, 2);
+        RemoteManager temp = getRemoteObj();
+        temp.removeRemote(args[1]);
+        temp.saveRemoteFile();
+    }
+
+    public static void push(String[] args) {
+        checkInit();
+        validateNumArgs(args, 3);
+        RemoteManager temp = getRemoteObj();
+        String info = temp.getPath(args[1]);//.../.gitlet
+        File file = new File(info);
+        if(!file.exists()) {
+            exitWithError("Remote directory not found.");
+        }
+        Branch br = Utils.readObject(file, Branch.class);
+        Commit currCom = br.getHead();
+        boolean inFuture = false;
+        int wrongDist = Integer.MAX_VALUE;
+        int distToCom = Integer.MAX_VALUE;
+        if(currCom.equals(new Commit())) {
+            inFuture = true;
+
+        } else {
+            wrongDist = Commit.calcDist(getHead(), new Commit(), 0);//if currCom isnt initial commit, but distance is equal then not in future
+            distToCom = Commit.calcDist(getHead(), currCom, 0);
+            if(distToCom==wrongDist) {
+                inFuture = false;
+            } else {
+                inFuture = true;
+            }
+        }
+
+        if(inFuture) {
+            ArrayList<Commit> line = new ArrayList<>();
+            Commit pointer = getHead();
+            while(pointer != currCom) {
+                line.add(0, pointer);
+                pointer = pointer.prev;
+            }
+            for(Commit com: line) {
+                Utils.writeObject(new File(info+"/"+com.getID()), com);//write the object into the commit folder
+            }
+            Utils.writeObject(new File(info+"/HEAD"), getHead());
+            br.setHead(getHead());
+            Utils.writeObject(new File(info+"/branches/"+br.getName()), br);
+        } else {
+            exitWithError("Please pull down remote changes before pushing.");
+        }
+    }
+
+    public static void fetch(String[] args) {
+        checkInit();
+        validateNumArgs(args, 3);
+        String path = getRemoteObj().getPath(args[1]);
+        if(path == null) {
+            exitWithError("Remote directory not found.");
+        }
+        File branchFile = new File(path+"/branches/"+args[2]);
+        if(!branchFile.exists()) {
+            exitWithError("That remote does not have that branch.");
+        }
+        Branch branch = Utils.readObject(branchFile, Branch.class);
+        Commit pointer = branch.getHead();
+        File currBranchFile = new File(".gitlet/branches/"+path+"/"+args[2]);
+        if(!currBranchFile.exists()) {
+            branch(new String[]{"branch", path+"/"+args[2]});
+        }
+        while(!pointer.equals(new Commit())) {
+            Utils.writeObject(new File(".gitlet/commit/"+pointer.getID()), pointer);
+            for(String blobSHA: pointer.getBlobs().values()) {
+                Blob currBlob = Blob.getBlobObj(blobSHA);
+                Utils.writeObject(currBlob.getBlobFile(), currBlob);
+            }
+        }
+        Branch currBr = Utils.readObject(currBranchFile, Branch.class);
+        currBr.setHead(branch.getHead());
+    }
+
+    public static void pull(String[] args) {
+        fetch(args);
+        merge(new String[]{"merge", args[1]+"/"+args[2]});
     }
 
     /**

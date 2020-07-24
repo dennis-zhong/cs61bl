@@ -752,6 +752,11 @@ public class Main {
             Utils.writeObject(new File(".gitlet/commit/"+pointer.getID()), pointer);
             for(String blobSHA: pointer.getBlobs().values()) {
                 Blob currBlob = Blob.getBlobObj(blobSHA);
+                try {
+                    currBlob.getBlobFile().createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 Utils.writeObject(currBlob.getBlobFile(), currBlob);
             }
             pointer = pointer.prev;

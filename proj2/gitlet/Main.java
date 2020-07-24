@@ -739,7 +739,13 @@ public class Main {
         Commit pointer = branch.getHead();
         File currBranchFile = new File(".gitlet/branches/"+args[1]+"/"+args[2]);
         if(!currBranchFile.exists()) {
+            new File(".gitlet/branches/"+args[1]).mkdir();
             Branch br = new Branch(args[1]+"/"+args[2]);
+            try {
+                br.branchFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             Utils.writeObject(br.branchFile, br);
         }
         while(!pointer.equals(new Commit())) {

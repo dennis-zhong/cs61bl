@@ -731,14 +731,15 @@ public class Main {
             exitWithError("Remote directory not found.");
         }
         File branchFile = new File(path+"/branches/"+args[2]);
+        System.out.println(branchFile);
         if(!branchFile.exists()) {
             exitWithError("That remote does not have that branch.");
         }
         Branch branch = Utils.readObject(branchFile, Branch.class);
         Commit pointer = branch.getHead();
-        File currBranchFile = new File(".gitlet/branches/"+path+"/"+args[2]);
+        File currBranchFile = new File(".gitlet/branches/"+args[1]+"/"+args[2]);
         if(!currBranchFile.exists()) {
-            branch(new String[]{"branch", path+"/"+args[2]});
+            branch(new String[]{"branch", args[1]+"/"+args[2]});
         }
         while(!pointer.equals(new Commit())) {
             Utils.writeObject(new File(".gitlet/commit/"+pointer.getID()), pointer);
@@ -746,6 +747,7 @@ public class Main {
                 Blob currBlob = Blob.getBlobObj(blobSHA);
                 Utils.writeObject(currBlob.getBlobFile(), currBlob);
             }
+            pointer = pointer.prev;
         }
         Branch currBr = Utils.readObject(currBranchFile, Branch.class);
         currBr.setHead(branch.getHead());

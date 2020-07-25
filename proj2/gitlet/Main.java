@@ -721,8 +721,8 @@ public class Main {
             for(Commit com: line) {
                 Utils.writeObject(new File(info+"/"+com.getID()), com);//write the object into the commit folder
             }
-            Utils.writeObject(new File(info+"/HEAD"), getHead());
             br.setHead(getHead());
+            Utils.writeObject(new File(info+"/HEAD"), br);
             Utils.writeObject(new File(info+"/branches/"+br.getName()), br);
         } else {
             exitWithError("Please pull down remote changes before pushing.");

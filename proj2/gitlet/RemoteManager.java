@@ -24,8 +24,8 @@ public class RemoteManager implements Serializable {
     }
 
     public void removeRemote(String name) {
-        if(remotes.keySet().contains(name)) {
-            System.out.println("A remote with that name already exists.");
+        if(!remotes.keySet().contains(name)) {
+            System.out.println("A remote with that name does not exists.");
         } else {
             remotes.remove(name);
         }

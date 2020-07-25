@@ -714,10 +714,10 @@ public class Main {
         if(inFuture) {
             ArrayList<Commit> line = new ArrayList<>();
             Commit pointer = getHead();
-            while(pointer != currCom) {
+            do {
                 line.add(0, pointer);
                 pointer = pointer.prev;
-            }
+            } while (pointer != currCom);
             for(Commit com: line) {
                 Utils.writeObject(new File(info+"/"+com.getID()), com);//write the object into the commit folder
             }

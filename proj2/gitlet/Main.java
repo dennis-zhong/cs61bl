@@ -717,7 +717,7 @@ public class Main {
             do {
                 line.add(0, pointer);
                 pointer = pointer.prev;
-            } while (pointer != currCom);
+            } while (!pointer.equals(currCom));
             for(Commit com: line) {
                 Utils.writeObject(new File(info+"/"+com.getID()), com);//write the object into the commit folder
             }
@@ -733,7 +733,7 @@ public class Main {
         checkInit();
         validateNumArgs(args, 3);
         String path = getRemoteObj().getPath(args[1]);
-        if(path == null) {
+        if(path == null || !new File(path).exists()) {
             exitWithError("Remote directory not found.");
         }
         File branchFile = new File(path+"/branches/"+args[2]);

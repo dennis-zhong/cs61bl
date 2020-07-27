@@ -1,41 +1,110 @@
+import java.lang.reflect.Array;
+import java.util.LinkedList;
+import java.util.stream.Collectors;
+
 public class SimpleNameMap {
 
-    /* TODO: Instance variables here */
+    LinkedList<Entry>[] entryArr;
+    int size;
+    static final double maxLoad = 0.75;
 
     public SimpleNameMap() {
-        // TODO: YOUR CODE HERE
+        entryArr = (LinkedList<Entry>[]) new LinkedList[10];
+        size = 0;
     }
 
     /* Returns the number of items contained in this map. */
     public int size() {
-        // TODO: YOUR CODE HERE
-        return 0;
+        return size;
+    }
+
+    public double loadFactor() {
+        return (double) (size+1)/entryArr.length;
     }
 
     /* Returns true if the map contains the KEY. */
     public boolean containsKey(String key) {
-        // TODO: YOUR CODE HERE
+        int index = Math.floorMod(key.hashCode(), entryArr.length);
+        if(entryArr[index] == null) {
+            return false;
+        }
+        for(Entry entry: entryArr[index]) {
+            if(entry.keyEquals(new Entry(key, null))) {
+                return true;
+            }
+        }
         return false;
     }
 
     /* Returns the value for the specified KEY. If KEY is not found, return
        null. */
     public String get(String key) {
-        // TODO: YOUR CODE HERE
+        if(containsKey(key)) {
+            LinkedList<Entry> pointer = entryArr[Math.floorMod(key.hashCode(), entryArr.length)];
+            return pointer.stream().filter(x->x.key.equals(key))
+                    .collect(Collectors.toList()).get(0).value;
+        }
         return null;
     }
 
     /* Puts a (KEY, VALUE) pair into this map. If the KEY already exists in the
        SimpleNameMap, replace the current corresponding value with VALUE. */
     public void put(String key, String value) {
-        // TODO: YOUR CODE HERE
+        int index = Math.floorMod(key.hashCode(), entryArr.length);
+        if(containsKey(key)) {
+            LinkedList<Entry> pointer = entryArr[index];
+            for(int i = 0; i < pointer.size(); i++) {
+                if(pointer.get(i).keyEquals(new Entry(key, null))) {
+                    pointer.get(i).value = value;
+                    break;
+                }
+            }
+        } else {
+            if(loadFactor()>maxLoad) {
+                resize();
+            }
+            if (entryArr[index] == null) {
+                entryArr[index] = new LinkedList<Entry>();
+            }
+            entryArr[index].addLast(new Entry(key, value));
+            size++;
+        }
+    }
+
+    public void resize() {
+        LinkedList[] temp = entryArr;
+        LinkedList<Entry> pointer;
+        entryArr = new LinkedList[entryArr.length*2];
+        size = 0;
+        for(int i = 0; i < temp.length; i++) {
+            pointer = temp[i];
+            if (pointer == null) continue;
+            for(Entry entry: pointer) {
+                this.put(entry.key, entry.value);
+            }
+        }
     }
 
     /* Removes a single entry, KEY, from this table and return the VALUE if
        successful or NULL otherwise. */
     public String remove(String key) {
-        // TODO: YOUR CODE HERE
-        return null;
+        Entry removed = new Entry(null, null);
+        if(containsKey(key)) {
+            LinkedList<Entry> pointer = entryArr[Math.floorMod(key.hashCode(), entryArr.length)];
+            for(int i = 0; i < pointer.size(); i++) {
+                if(pointer.get(i).keyEquals(new Entry(key, null))) {
+                    removed = pointer.get(i);
+                    pointer.remove(pointer.get(i));
+                    break;
+                }
+            }
+            size--;
+        }
+        return removed.value;
+    }
+
+    public int hashCode(String entry) {
+        return (int) (entry.charAt(0) - 'A');
     }
 
     private static class Entry {

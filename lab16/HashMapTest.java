@@ -4,7 +4,6 @@ import org.junit.Test;
 import java.util.HashSet;
 
 public class HashMapTest {
-
     @Test
     public void testConstructor() {
         // assert constructors are initialized, seem to work correctly, and
@@ -183,5 +182,4 @@ public class HashMapTest {
         }
         assertEquals(expected, output);
     }
-
 }

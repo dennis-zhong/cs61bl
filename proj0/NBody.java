@@ -67,10 +67,10 @@ public class NBody{
     }
     StdOut.printf("%d\n", bodies.length);
     StdOut.printf("%.2e\n", radius);
-    for (int i = 0; i < bodies.length; i += 1) {
+    for (int x = 0; x < bodies.length; x += 1) {
         StdOut.printf("%11.4e %11.4e %11.4e %11.4e %11.4e %12s\n",
-                      bodies[i].xxPos, bodies[i].yyPos, bodies[i].xxVel,
-                      bodies[i].yyVel, bodies[i].mass, bodies[i].imgFileName);
+                      bodies[x].xxPos, bodies[x].yyPos, bodies[x].xxVel,
+                      bodies[x].yyVel, bodies[x].mass, bodies[x].imgFileName);
     }
   }
 }

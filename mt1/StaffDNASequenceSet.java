@@ -1,34 +1,34 @@
-public class DNASequenceSet {
+public class StaffDNASequenceSet {
     private DNANode sentinel;
 
-    public DNASequenceSet() {
+    public StaffDNASequenceSet() {
         sentinel = new DNANode(-1, false);
     }
 
     public void add(int[] sequence) {
         DNANode pointer = sentinel;
         for (int i = 0; i < sequence.length; i++) {
-            //if(pointer.nexts[sequence[i]].endOfSequence) { continue; }
-            if (pointer.nexts[sequence[i]] == null) {
-                pointer.nexts[sequence[i]] = new DNANode(sequence[i], false);
+            int base = sequence[i];
+            if (pointer.nexts[base] == null) {
+                pointer.nexts[base] = new DNANode(base, false);
             }
-            pointer = pointer.nexts[sequence[i]];
+            pointer = pointer.nexts[base];
         }
         pointer.endOfSequence = true;
     }
 
     public boolean contains(int[] sequence) {
         DNANode pointer = sentinel;
-        int i = 0;
-        for (; i < sequence.length; i++) {
-            //if(pointer.nexts[sequence[i]].endOfSequence) { return true; }
-            if (pointer.nexts[sequence[i]] == null) {
+        for (int i = 0; i < sequence.length; i++) {
+            int base = sequence[i];
+            if (pointer.nexts[base] == null) {
                 return false;
             }
-            pointer = pointer.nexts[sequence[i]];
+            pointer = pointer.nexts[base];
         }
         return pointer.endOfSequence;
     }
+
 
     public static class DNANode {
         private int base;

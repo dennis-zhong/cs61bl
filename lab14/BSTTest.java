@@ -9,18 +9,15 @@ public class BSTTest {
 
     @Test
     public void BSTTreeTest() {
-        LinkedList<Integer> arr = new LinkedList<>();
-        arr.add(1);
-        arr.add(2);
-        arr.add(3);
-        arr.add(4);
-        arr.add(5);
-        arr.add(6);
-        arr.add(7);
-        arr.add(8);
-        arr.add(9);
-        arr.add(10);
-        BST<Integer> bst = new BST<Integer>(arr);
+        LinkedList<String> arr = new LinkedList<>();
+        arr.add("D");
+        arr.add("A");
+        arr.add("C");
+        arr.add("G");
+        arr.add("H");
+        arr.add("L");
+        arr.add("P");
+        BST<String> bst = new BST<String>(arr);
         bst.print();
     }
 }

@@ -1,11 +1,26 @@
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 /**
  * A DLList is a list of integers. Like SLList, it also hides the terrible
  * truth of the nakedness within, but with a few additional optimizations.
  */
 public class DLList<Item> implements Iterable<Item> {
+
+    public static void main(String[] args) {
+        LinkedList<Integer> a = new LinkedList<>();
+        a.addLast(1);
+        a.addLast(2);
+        a.addLast(3);
+        Iterator<Integer> b = a.iterator();
+        b.next();
+        b.next();
+        b.next();
+        System.out.println(b.hasNext());
+        System.out.println(b.next());
+        System.out.println(b.hasNext());
+    }
     private class Node {
         public Node prev;
         public Item item;
@@ -97,7 +112,6 @@ public class DLList<Item> implements Iterable<Item> {
 
         @Override
         public boolean hasNext() {
-
             if (counter < size()) {
                 return true;
             }

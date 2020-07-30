@@ -12,7 +12,9 @@ public class Sorter {
             }
             values[j + 1] = temp;
         }
-    }
+    } //83100 ish
+    // 5
+    //A + B, A + C
 
     public static void main(String[] args) {
         if (args.length != 1) {

@@ -36,7 +36,7 @@ public class Dog implements Serializable { // FIXME
         return doggy;
     }
 
-    /**
+    /**S
      * Increases a dog's age and celebrates!
      */
     public void haveBirthday() {

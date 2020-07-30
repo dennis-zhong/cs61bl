@@ -213,6 +213,7 @@ public class Graph implements Iterable<Integer> {
         return new ArrayList<>();
     }
 
+
     public List<Integer> topologicalSort() {
         ArrayList<Integer> result = new ArrayList<Integer>();
         Iterator<Integer> iter = new TopologicalIterator();
@@ -253,11 +254,11 @@ public class Graph implements Iterable<Integer> {
         public Integer next() {
             int curr = fringe.pop();
             visited.add(curr);
-            for(int x: neighbors(curr)) {
-                if(!visited.contains(x)) {
+            for (int x : neighbors(curr)) {
+                if (!visited.contains(x)) {
                     inDegreeMap.put(x, inDegreeMap.get(x) - 1);
                 }
-                if(inDegreeMap.get(x) != null && inDegreeMap.get(x) == 0) {
+                if (inDegreeMap.get(x) != null && inDegreeMap.get(x) == 0) {
                     inDegreeMap.remove(x);
                     fringe.push(x);
                 }

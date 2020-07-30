@@ -245,7 +245,7 @@ public class Graph implements Iterable<Integer> {
 
         TopologicalIterator() {
             fringe = new Stack<Integer>();
-            // TODO: YOUR CODE HERE
+            // TODO:
         }
 
         public boolean hasNext() {

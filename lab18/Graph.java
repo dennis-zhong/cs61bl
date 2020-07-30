@@ -171,8 +171,12 @@ public class Graph implements Iterable<Integer> {
        START and STOP are in this graph. If START == STOP, returns true. */
     public boolean pathExists(int start, int stop) {
         // TODO: YOUR CODE HERE
-        List<Integer> lst = dfs(start);
-        return lst.contains(stop);
+        if (start == stop){
+            return true;
+        }else {
+            List<Integer> lst = dfs(start);
+            return lst.contains(stop);
+        }
     }
 
 

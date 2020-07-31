@@ -98,15 +98,21 @@ public class Graph implements Iterable<Integer> {
         while(!fringe.isEmpty()) {
             int v = fringe.poll();
             visited.add(v);
+            if(v == stop) {
+                break;
+            }
             for(int neighbor: neighbors(v)) {
+                if(visited.contains(neighbor)) {
+                    continue;
+                }
                 int edgeWeight = getEdge(v, neighbor).weight;
                 if(weights[neighbor] == null) {
                     weights[neighbor] = edgeWeight+weights[v];
                     fringe.add(neighbor);
                     predecesors[neighbor] = v;
                 } else {
-                    if(edgeWeight<weights[neighbor]) {
-                        weights[neighbor] = edgeWeight;
+                    if(edgeWeight+weights[v]<weights[neighbor]) {
+                        weights[neighbor] = edgeWeight+weights[v];
                         predecesors[neighbor] = v;
                     }
                 }
@@ -434,5 +440,8 @@ public class Graph implements Iterable<Integer> {
         g2.generateG2();
         g2.printTopologicalSort();*/
         System.out.println(g1.shortestPath(3, 4));
+        System.out.println(g1.shortestPath(0, 4));
+        System.out.println(g1.shortestPath(1, 4));
+        System.out.println(g1.shortestPath(4, 3));
     }
 }

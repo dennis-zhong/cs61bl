@@ -99,9 +99,6 @@ public class Graph implements Iterable<Integer> {
             int v = fringe.poll();
             visited.add(v);
             for(int neighbor: neighbors(v)) {
-                if(visited.contains(neighbor)) {
-                    continue;
-                }
                 int edgeWeight = getEdge(v, neighbor).weight;
                 if(weights[neighbor] == null) {
                     weights[neighbor] = edgeWeight+weights[v];

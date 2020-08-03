@@ -16,11 +16,7 @@ public class UnionFind {
     /* Returns the size of the set V belongs to. */
     public int sizeOf(int v) {
         checkInput(v);
-        if(arr[v]<0) {
-            return -arr[v];
-        } else {
-            return arr[find(v)];
-        }
+        return -arr[find(v)];
     }
 
     private void checkInput(int v) {

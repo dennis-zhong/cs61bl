@@ -28,11 +28,7 @@ public class UnionFind {
     /* Returns the parent of V. If V is the root of a tree, returns the
        negative size of the tree for which V is the root. */
     public int parent(int v) {
-        if(arr[v]<0) {
-            return -arr[v];
-        } else {
-            return arr[v];
-        }
+        return arr[v];
     }
 
     /* Returns true if nodes V1 and V2 are connected. */
@@ -75,7 +71,7 @@ public class UnionFind {
         int size1 = sizeOf(v1);
         int size2 = sizeOf(v2);
         int larger, smaller = 0;
-        if(size1>size2) {
+        if(size1>=size2) {
             larger = v1;
             smaller = v2;
         } else {

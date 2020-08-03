@@ -33,10 +33,10 @@ public class UnionFind {
 
     /* Returns true if nodes V1 and V2 are connected. */
     public boolean connected(int v1, int v2) {
-        if(v1<0||v2<0) {
+        if(arr[v1]<0||arr[v2]<0) {
             return false;
         }
-        return v1==v2||parent(v1)==parent(v2)||connected(v1, parent(v2))||connected(parent(v1), v2);
+        return find(v1)==find(v2);
     }
 
     /* Returns the root of the set V belongs to. Path-compression is employed
@@ -68,6 +68,9 @@ public class UnionFind {
     public void union(int v1, int v2) {
         checkInput(v1);
         checkInput(v2);
+        if(v1==v2||connected(v1, v2)) {
+            return;
+        }
         int size1 = sizeOf(v1);
         int size2 = sizeOf(v2);
         int larger, smaller = 0;

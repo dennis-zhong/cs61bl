@@ -12,11 +12,12 @@ public class UnionFindTest {
         }
         set.union(0, 1);
         set.union(2, 3);
-        assertTrue(set.sizeOf(0) == 2);
-        assertTrue(set.parent(1) == 0);
-        assertTrue(set.sizeOf(2) == 2);
-        assertTrue(set.parent(3) == 2);
-        assertTrue(set.sizeOf(4) == 1);
         set.union(0, 2);
+
+        UnionFind set2 = new UnionFind(6);
+        set2.union(0, 1);
+        set2.union(0, 2);
+        set2.union(3, 4);
+        set2.union(3, 0);
     }
 }

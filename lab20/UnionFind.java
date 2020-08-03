@@ -71,7 +71,7 @@ public class UnionFind {
         int size1 = sizeOf(v1);
         int size2 = sizeOf(v2);
         int larger, smaller = 0;
-        if(size1>size2) {
+        if(size1>=size2) {
             larger = v1;
             smaller = v2;
         } else {

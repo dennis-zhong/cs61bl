@@ -82,7 +82,8 @@ public class UnionFind {
             larger = v2;
             smaller = v1;
         }
-        arr[find(smaller)] = find(larger);
-        arr[larger] = -(size1+size2);
+        int largerRoot = find(larger);
+        arr[find(smaller)] = largerRoot;
+        arr[largerRoot] = -(size1+size2);
     }
 }

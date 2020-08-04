@@ -1,15 +1,9 @@
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.HashSet;
-import java.util.HashMap;
+import java.util.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.io.BufferedReader;
 import java.nio.charset.Charset;
 import java.io.IOException;
-import java.util.Random;
-import java.util.Queue;
-import java.util.ArrayDeque;
 
 /* A mutable and finite Graph object. Edge labels are stored via a HashMap
    where labels are mapped to a key calculated by the following. The graph is
@@ -130,13 +124,55 @@ public class Graph {
     }
 
     public Graph prims(int start) {
-        // TODO: YOUR CODE HERE
-        return null;
+        Graph t = new Graph();
+        HashMap<Integer, Edge> distFromTree = new HashMap<>();
+        HashSet<Integer> visited = new HashSet<>();
+        PriorityQueue<Integer> fringe = new PriorityQueue<>(Comparator.comparingInt(a -> distFromTree.get(a).getWeight()));
+        fringe.add(start);
+        while(!fringe.isEmpty()) {
+            int v = fringe.poll();
+            t.addVertex(v);
+            visited.add(v);
+            if(t.getAllEdges().size() >= this.getAllVertices().size()-1) {
+                break;
+            }
+            if(distFromTree.get(v) != null
+                    && !t.getEdges(distFromTree.get(v).getDest())
+                    .contains(distFromTree.get(v))
+                    && !t.getEdges(v).contains(distFromTree.get(v))) {
+                t.addEdge(distFromTree.get(v));
+            }
+            for(Edge edge: getEdges(v)) {
+                if(t.containsVertex(edge.getDest())) {
+                    continue;
+                }
+                if(distFromTree.get(edge.getDest()) == null
+                        ||distFromTree.get(edge.getDest()).getWeight()>edge.getWeight()) {
+                    distFromTree.put(edge.getDest(), edge);
+                }
+                if(!visited.contains(edge.getDest())&&!fringe.contains(edge.getDest())) {
+                    fringe.add(edge.getDest());
+                }
+            }
+        }
+        return t;
     }
 
     public Graph kruskals() {
-        // TODO: YOUR CODE HERE
-        return null;
+        Graph t = new Graph();
+        for(Integer vertex: this.getAllVertices()) {
+            t.addVertex(vertex);
+        }
+        UnionFind set = new UnionFind(t.getAllVertices().size());
+        for(Iterator<Edge> x = this.getAllEdges().iterator();
+            x.hasNext(); ) {
+            Edge curr = x.next();
+            if(!set.connected(curr.getSource(), curr.getDest())) {
+                t.addEdge(curr);
+                set.union(curr.getSource(), curr.getDest());
+            }
+        }
+        return t;
     }
 
     /* Returns a randomly generated graph with VERTICES number of vertices and

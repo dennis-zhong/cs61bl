@@ -125,12 +125,6 @@ public class KDTree implements PointSet {
         return best;
     }
 
-    private double calcDist(Point x, Point y) {
-        double xx = x.getX() - y.getX();
-        double yy = x.getY() - y.getY();
-        return xx*xx+yy*yy;
-    }
-
     private static class KDNode {
         Point item;
         KDNode left;
@@ -138,20 +132,6 @@ public class KDTree implements PointSet {
 
         public KDNode(Point point) {
             item = point;
-        }
-
-        public KDNode(Point point, KDNode left, KDNode right) {
-            item = point;
-            this.left = left;
-            this.right = right;
-        }
-
-        public void setLeft(KDNode node) {
-            left = node;
-        }
-
-        public void setRight(KDNode node) {
-            right = node;
         }
     }
 }

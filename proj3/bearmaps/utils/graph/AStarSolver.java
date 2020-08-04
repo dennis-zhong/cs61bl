@@ -94,4 +94,4 @@ public class AStarSolver<Vertex> implements ShortestPathsSolver<Vertex> {
     public double explorationTime() {
         return exploreTime;
     }
-} //what exactly is relaxation
+}

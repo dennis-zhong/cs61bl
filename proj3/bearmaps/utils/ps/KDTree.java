@@ -13,15 +13,13 @@ public class KDTree implements PointSet {
 
 
     public KDTree(List<Point> points) {
-        ArrayList<Point> copy = new ArrayList<>();
-        HashSet<Point> tracker = new HashSet<>();
+        HashSet<Point> copy = new HashSet<>();
         for(Point point: points) {
-            if(!tracker.contains(point)) {
+            if(!copy.contains(point)) {
                 copy.add(point);
-                tracker.add(point);
             }
         }
-        root = insert(root, copy, 0);
+        root = insert(root, new ArrayList<>(copy), 0);
     }
 
     private KDNode insert(KDNode curr, List<Point> points, int depth) {

@@ -17,8 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static bearmaps.utils.Constants.SEMANTIC_STREET_GRAPH;
-import static bearmaps.utils.Constants.ROUTE_LIST;
+import static bearmaps.utils.Constants.*;
 
 /**
  * Handles requests from the web browser for map images. These images
@@ -84,11 +83,60 @@ public class RasterAPIHandler extends APIRouteHandler<Map<String, Double>, Map<S
      */
     @Override
     public Map<String, Object> processRequest(Map<String, Double> requestParams, Response response) {
-        //System.out.println("yo, wanna know the parameters given by the web browser? They are:");
-        //System.out.println(requestParams);
+        System.out.println("yo, wanna know the parameters given by the web browser? They are:");
+        System.out.println(requestParams);
         Map<String, Object> results = new HashMap<>();
-        System.out.println("Since you haven't implemented RasterAPIHandler.processRequest, nothing is displayed in "
-                + "your browser.");
+        double goalLonDPP = (requestParams.get("lrlon")-requestParams.get("ullon"))/requestParams.get("w");
+        double rootLonDPP = (ROOT_LRLON-ROOT_ULLON)/TILE_SIZE; //.00032 sorta
+        int A = (int) Math.ceil(Math.log(rootLonDPP/goalLonDPP)/Math.log(2)); //dA_xx_yy;
+        if(A>7) {
+            A = 7;
+        }
+        double correctLonDPP = rootLonDPP/Math.pow(2, A); //DPP of each tile in query
+        double correctLatDPP = (ROOT_ULLAT-ROOT_LRLAT)/TILE_SIZE/Math.pow(2, A);
+        int left = (int) Math.floor((-Constants.ROOT_ULLON+requestParams.get("ullon"))/correctLonDPP/TILE_SIZE);
+        int right = (int) (Math.pow(2, A) - Math.floor((Constants.ROOT_LRLON-requestParams.get("lrlon"))/correctLonDPP/TILE_SIZE));//indexes
+        int top = (int) Math.floor((Constants.ROOT_ULLAT-requestParams.get("ullat"))/correctLatDPP/TILE_SIZE);
+        int bot = (int) (Math.pow(2, A) - Math.floor((-Constants.ROOT_LRLAT+requestParams.get("lrlat"))/correctLatDPP/TILE_SIZE));
+        boolean query_success = true;
+        if(left<0) {
+            left = 0;
+        } if(top < 0) {
+            top = 0;
+        } if(right > Math.pow(2, A)) {
+            right = (int) Math.pow(2, A);
+        } if(bot > Math.pow(2, A)) {
+            bot = (int) Math.pow(2, A);
+        } if(left > Math.pow(2, A)) {
+            left = (int) Math.pow(2, A);
+            query_success = false;
+        } if(top > Math.pow(2, A)) {
+            top = (int) Math.pow(2, A);
+            query_success = false;
+        } if(right < 0) {
+            right = 0;
+            query_success = false;
+        } if(bot < 0) {
+            top = 0;
+            query_success = false;
+        }
+        String[][] render_grid = new String[bot-top][right-left];
+        int row = 0;
+        for(int i = top; i < bot; i++)  {
+            int col = 0;
+            for(int j = left; j < right; j++) {
+                render_grid[row][col] = "d"+A+"_x"+j+"_y"+i+".png";//input pngs
+                col++;
+            }
+            row++;
+        }
+        results.put("render_grid", render_grid);
+        results.put("raster_ul_lon", Constants.ROOT_ULLON+left*correctLonDPP*TILE_SIZE);
+        results.put("raster_ul_lat", Constants.ROOT_ULLAT-top*correctLatDPP*TILE_SIZE);
+        results.put("raster_lr_lon", Constants.ROOT_ULLON+right*correctLonDPP*TILE_SIZE);
+        results.put("raster_lr_lat", Constants.ROOT_ULLAT-bot*correctLatDPP*TILE_SIZE);
+        results.put("depth", A);
+        results.put("query_success", query_success);
         return results;
     }
 

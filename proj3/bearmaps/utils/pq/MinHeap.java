@@ -1,6 +1,7 @@
 package bearmaps.utils.pq;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.NoSuchElementException;
 
 /* A MinHeap class of Comparable elements backed by an ArrayList. */
@@ -9,11 +10,13 @@ public class MinHeap<E extends Comparable<E>> {
     /* An ArrayList that stores the elements in this MinHeap. */
     private ArrayList<E> contents;
     private int size;
+    private HashMap<E, Integer> indexMap;
 
     /* Initializes an empty MinHeap. */
     public MinHeap() {
         contents = new ArrayList<E>();
         contents.add(null);
+        indexMap = new HashMap<>();
     }
 
     /* Returns the element at index INDEX, and null if it is out of bounds. */
@@ -32,6 +35,7 @@ public class MinHeap<E extends Comparable<E>> {
             contents.add(null);
         }
         contents.set(index, element);
+        indexMap.put(element, index);
     }
 
     /* Swaps the elements at the two indices. */
@@ -147,6 +151,7 @@ public class MinHeap<E extends Comparable<E>> {
         swap(1, size);
         E node = contents.remove(size);
         bubbleDown(1);
+        indexMap.remove(node);
         size--;
         return node;
     }
@@ -156,8 +161,8 @@ public class MinHeap<E extends Comparable<E>> {
        not exist in the MinHeap, throw a NoSuchElementException. Item equality
        should be checked using .equals(), not ==. */
     public void update(E element) {
-        int index = 0;
-        index = updateHelper(element, 1);
+        Integer index = 0;
+        index = indexMap.get(element);
         if(index == 0) {
             throw new NoSuchElementException();
         }
@@ -181,7 +186,7 @@ public class MinHeap<E extends Comparable<E>> {
     /* Returns true if ELEMENT is contained in the MinHeap. Item equality should
        be checked using .equals(), not ==. */
     public boolean contains(E element) {
-        return containshelper(element, 1);
+        return indexMap.containsKey(element);
     }
 
     private boolean containshelper(E element, int index) {

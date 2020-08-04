@@ -30,23 +30,23 @@ public class MinHeapPQTest {
     public void ExtremeTest() {
         double myHeapTime = 0;
         double naiveHeapTime = 0;
-        for(int a = 0; a<1; a++) {
+        for(int a = 0; a<10; a++) {
             MinHeapPQ<Double> h = new MinHeapPQ<>();
             NaiveMinPQ<Double> bot = new NaiveMinPQ<>();
             ArrayList<Double> collection = new ArrayList<>();
-            for(int i = 0; i < 10000; i++) {
+            for(int i = 0; i < 1000000; i++) {
                 double currVal = Math.random()*1000;
                 double priorVal = Math.random()*10000;
                 collection.add(currVal);
                 Stopwatch watch1 = new Stopwatch();
                 h.insert(currVal, priorVal);
-                myHeapTime+=watch1.elapsedTime();
+                //myHeapTime+=watch1.elapsedTime();
                 Stopwatch watch2 = new Stopwatch();
                 bot.insert(currVal, priorVal);
-                naiveHeapTime+=watch2.elapsedTime();
+                //naiveHeapTime+=watch2.elapsedTime();
             }
 
-            for(int i = 0; i < 100; i++) {
+            for(int i = 0; i < 1000; i++) {
                 double decider = Math.random();
                 if(decider<0.15) {
                     Stopwatch watch1 = new Stopwatch();

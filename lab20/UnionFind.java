@@ -33,9 +33,6 @@ public class UnionFind {
 
     /* Returns true if nodes V1 and V2 are connected. */
     public boolean connected(int v1, int v2) {
-        if(arr[v1]<0||arr[v2]<0) {
-            return false;
-        }
         return find(v1)==find(v2);
     }
 

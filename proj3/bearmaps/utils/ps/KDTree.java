@@ -8,17 +8,18 @@ import java.util.List;
 public class KDTree implements PointSet {
 
     private KDNode root;
+    //private HashSet<Point> copy = new HashSet<>();
     private Comparator<Point> compareX = (a, b) -> Double.compare(a.getX(), b.getX());
     private Comparator<Point> compareY = (a, b) -> Double.compare(a.getY(), b.getY());
 
 
     public KDTree(List<Point> points) {
         HashSet<Point> copy = new HashSet<>();
-        for(Point point: points) {
+        /*for(Point point: points) {
             if(!copy.contains(point)) {
                 copy.add(point);
             }
-        }
+        }*/
         root = insert(root, new ArrayList<>(copy), 0);
     }
 
@@ -26,6 +27,16 @@ public class KDTree implements PointSet {
         if(points.isEmpty()) {
             return curr;
         }
+        /*
+        points.sort(getComp(depth));
+        if(contents.contains(points.get(points.size()/2))) {
+            points.remove(points.size()/2);
+        }
+        int middle = points.size()/2;
+        contents.add(points.get(middle));
+        curr = new KDNode(points.get(middle));
+        curr.left = insert(curr.left, points.subList(0, middle), depth+1);
+        curr.right = insert(curr.right, points.subList(middle+1, points.size()), depth+1);*/
         points.sort(getComp(depth));
         int middle = points.size()/2;
         curr = new KDNode(points.get(middle));
@@ -33,25 +44,6 @@ public class KDTree implements PointSet {
         curr.right = insert(curr.right, points.subList(middle+1, points.size()), depth+1);
         return curr;
     }
-    /*
-    private KDNode insertHelper(KDNode curr, Point point, int depth) {
-        if(curr == null) {
-            return new KDNode(point);
-        } else if(getComp(depth).compare(curr.item, point)<0) {
-            if(curr.left == null) {
-                curr.left = new KDNode(point);
-            } else {
-                curr.left = insertHelper(curr.left, point, depth+1);
-            }
-        } else {
-            if(curr.right == null) {
-                curr.right = new KDNode(point);
-            } else {
-                curr.right = insertHelper(curr.right, point, depth+1);
-            }
-        }
-        return curr;
-    }*/
 
     private Comparator<Point> getComp(int depth) {
         if(depth%2 == 0) {

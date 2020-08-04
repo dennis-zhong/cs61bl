@@ -67,13 +67,13 @@ public class KDTreeTest {
             for(int i = 0; i < 100000; i++) {
                 lst.add(new Point(Math.random() * 1000, Math.random() * 1000));
             }
-            //Stopwatch watch1 = new Stopwatch();
+            Stopwatch watch1 = new Stopwatch();
             NaivePointSet nn = new NaivePointSet(lst);
-            //totalRound1+=watch1.elapsedTime();
-            //Stopwatch watch2 = new Stopwatch();
+            totalRound1+=watch1.elapsedTime();
+            Stopwatch watch2 = new Stopwatch();
             KDTree tree = new KDTree(lst);
-            //totalRound2+=watch2.elapsedTime();
-            for(int b = 0; b<10000; b++) {
+            totalRound2+=watch2.elapsedTime();
+            /*for(int b = 0; b<10000; b++) {
                 double x = Math.random() * 1000;
                 double y = Math.random() * 1000;
                 Stopwatch watch1 = new Stopwatch();
@@ -85,7 +85,7 @@ public class KDTreeTest {
                 double round2 = watch2.elapsedTime();
                 totalRound2+=round2;
                 assertEquals(treeN, goal);
-            }
+            }*/
         }
         System.out.println("Naive time: " +totalRound1+"\nTree time: "+totalRound2);
     }

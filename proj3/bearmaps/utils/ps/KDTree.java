@@ -21,7 +21,10 @@ public class KDTree implements PointSet {
                 copy.add(point);
             }
         }*/
-        root = insert(root, points.stream().collect(Collectors.toList()), 0);
+        //root = insert(root, points.stream().collect(Collectors.toList()), 0);
+        for(Point point: points) {
+            root = insert2(root, point, 0);
+        }
     }
 
     private KDNode insert(KDNode curr, List<Point> points, int depth) {
@@ -46,6 +49,17 @@ public class KDTree implements PointSet {
         return curr;
     }
 
+    private KDNode insert2(KDNode node, Point point, int depth) {
+        if(node == null) {
+            return new KDNode(point);
+        } else if(getComp(depth).compare(node.item, point)>0) {
+            node.left = insert2(node.left, point, depth+1);
+        } else {
+            node.right = insert2(node.right, point, depth+1);
+        }
+        return node;
+    }
+
     private Comparator<Point> getComp(int depth) {
         if(depth%2 == 0) {
             return compareX;
@@ -56,8 +70,7 @@ public class KDTree implements PointSet {
 
     @Override
     public Point nearest(double x, double y) {
-        Point temp = new Point(x, y);
-        return nearestHelper(root, root, temp, 0).item;
+        return nearestHelper(root, root, new Point(x, y), 0).item;
     }
 
     private KDNode nearestHelper(KDNode from, KDNode best, Point to, int depth) {

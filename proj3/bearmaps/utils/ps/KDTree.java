@@ -20,7 +20,7 @@ public class KDTree implements PointSet {
                 copy.add(point);
             }
         }*/
-        root = insert(root, new ArrayList<>(copy), 0);
+        root = insert(root, points, 0);
     }
 
     private KDNode insert(KDNode curr, List<Point> points, int depth) {

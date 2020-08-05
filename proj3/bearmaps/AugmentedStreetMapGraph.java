@@ -6,10 +6,7 @@ import bearmaps.utils.graph.streetmap.StreetMapGraph;
 import bearmaps.utils.ps.KDTree;
 import bearmaps.utils.ps.Point;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.LinkedList;
+import java.util.*;
 
 /**
  * An augmented graph that is more powerful that a standard StreetMapGraph.
@@ -32,7 +29,7 @@ public class AugmentedStreetMapGraph extends StreetMapGraph {
             double y = projectToY(node.lon(), node.lat());
             map.put(new Point(x, y), node);
         }
-        tree = new KDTree(List.copyOf(map.keySet()));
+        tree = new KDTree(new ArrayList<Point>(map.keySet()));
     }
 
 

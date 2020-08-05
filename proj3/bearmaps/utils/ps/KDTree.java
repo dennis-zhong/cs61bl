@@ -21,10 +21,10 @@ public class KDTree implements PointSet {
                 copy.add(point);
             }
         }*/
-        //root = insert(root, points.stream().collect(Collectors.toList()), 0);
-        for(Point point: points) {
+        root = insert(root, points, 0);
+        /*for(Point point: points) {
             root = insert2(root, point, 0);
-        }
+        }*/
     }
 
     private KDNode insert(KDNode curr, List<Point> points, int depth) {

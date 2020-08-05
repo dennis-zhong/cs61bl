@@ -161,8 +161,7 @@ public class MinHeap<E extends Comparable<E>> {
        not exist in the MinHeap, throw a NoSuchElementException. Item equality
        should be checked using .equals(), not ==. */
     public void update(E element) {
-        Integer index = 0;
-        index = indexMap.get(element);
+        Integer index = indexMap.get(element);
         if(index == 0) {
             throw new NoSuchElementException();
         }
@@ -171,33 +170,9 @@ public class MinHeap<E extends Comparable<E>> {
         bubbleDown(index);
     }
 
-    private int updateHelper(E element, int index) {
-        if(index>size) {
-            return 0;
-        } else if(contents.get(index).equals(element)) {
-            return index;
-        } //else if(contents.get(index).compareTo(container.get(element))>0) {
-            //return 0;}
-        else {
-            return updateHelper(element, getLeftOf(index)) + updateHelper(element, getRightOf(index));
-        }
-    }
-
     /* Returns true if ELEMENT is contained in the MinHeap. Item equality should
        be checked using .equals(), not ==. */
     public boolean contains(E element) {
         return indexMap.containsKey(element);
-    }
-
-    private boolean containshelper(E element, int index) {
-        if(index>size) {
-            return false;
-        } else if(contents.get(index).equals(element)) {
-            return true;
-        } //else if(contents.get(index).compareTo(container.get(element))>0) {
-            //return false;}
-        else {
-            return containshelper(element, getLeftOf(index)) || containshelper(element, getRightOf(index));
-        }
     }
 }

@@ -20,6 +20,8 @@ public class AugmentedStreetMapGraph extends StreetMapGraph {
 
     private KDTree tree;
     private HashMap<Point, Node> map;
+    private Trie trie;
+    private HashMap<String, Node> names;
 
     public AugmentedStreetMapGraph(String dbPath) {
         super(dbPath);
@@ -31,6 +33,13 @@ public class AugmentedStreetMapGraph extends StreetMapGraph {
             map.put(new Point(x, y), node);
         }
         tree = new KDTree(new ArrayList<Point>(map.keySet()));
+
+        trie = new Trie();//EC
+        names = new HashMap<>();
+        for(Node node: this.getNodes().stream().filter(x->x.name()!=null).collect(Collectors.toList())) {
+            trie.add(cleanString(node.name()));
+            names.put(cleanString(node.name()), node);
+        }
     }
 
 
@@ -87,9 +96,11 @@ public class AugmentedStreetMapGraph extends StreetMapGraph {
      * cleaned <code>prefix</code>.
      */
     public List<String> getLocationsByPrefix(String prefix) {
-        return getNodes().stream().filter(x->x.name()!=null)
-                .map(x->x.name()).filter(x->cleanString(x).startsWith(cleanString(prefix)))
-                .collect(Collectors.toList());
+        ArrayList<String> locations = new ArrayList<>();
+        for(String str: trie.keysWithPrefix(prefix)) {
+            locations.add(names.get(str).name());
+        }
+        return locations;
     }
 
     /**
@@ -107,10 +118,9 @@ public class AugmentedStreetMapGraph extends StreetMapGraph {
      */
     public List<Map<String, Object>> getLocations(String locationName) {
         LinkedList<Map<String, Object>> map = new LinkedList<>();
-        List<Node> locations = getNodes().stream().filter(x->x.name()!=null)
-                .filter(x->cleanString(x.name()).equals(cleanString(locationName)))
-                .collect(Collectors.toList());
-        for(Node node: locations) {
+        List<String> locations = trie.keysWithPrefix(cleanString(locationName));
+        for(String string: locations) {
+            Node node = names.get(string);
             HashMap<String, Object> curr = new HashMap<>();
             curr.put("lat", node.lat());
             curr.put("lon", node.lon());
@@ -143,4 +153,91 @@ public class AugmentedStreetMapGraph extends StreetMapGraph {
     /** Longitude centered on Berkeley. */
     private static final double ROOT_LON = (Constants.ROOT_ULLON + Constants.ROOT_LRLON) / 2;
 
+    private class Trie {
+
+        Node root;
+
+        public Trie() {
+            root = new Node();
+        }
+
+        /** Clears all items out of Trie */
+        public void clear() {
+            root = new Node();
+        }
+
+        /** Returns true if the Trie contains KEY, false otherwise */
+        public boolean contains(String key) {
+            Node pointer = root;
+            do {
+                if(pointer == null) {
+                    return false;
+                }
+                pointer = pointer.map.get(key.charAt(0));
+                key = key.substring(1);
+            } while (!key.equals(""));
+            return pointer.isKey;
+        }
+
+        /** Returns a list of all words that start with PREFIX */
+        public List<String> keysWithPrefix(String prefix) {
+            ArrayList<String> collective = new ArrayList<>();
+            Node pointer = root;
+            String copy = prefix;
+            do {
+                if(pointer == null) {
+                    return collective;
+                }
+                pointer = pointer.map.get(copy.charAt(0));
+                copy = copy.substring(1);
+            } while (!copy.equals(""));
+            collectStrings(pointer, prefix, collective);
+            return collective;
+        }
+
+        private void collectStrings(Node node, String prefix, ArrayList<String> collector) {
+            if(node == null) {
+                return;
+            } else if(node.isKey) {
+                collector.add(prefix);
+            }
+            for (char c: node.map.keySet()) {
+                prefix+=c;
+                collectStrings(node.map.get(c), prefix, collector);
+                prefix = prefix.substring(0, prefix.length()-1);
+            }
+        }
+
+        public void add(String key) {
+            if (key == null || key.length() < 1) {
+                return;
+            }
+            Node curr = root;
+            for (int i = 0, n = key.length(); i < n; i++) {
+                char c = key.charAt(i);
+                if (!curr.map.containsKey(c)) {
+                    curr.map.put(c, new Node(c, false));
+                }
+                curr = curr.map.get(c);
+            }
+            curr.isKey = true;
+        }
+
+        private class Node {
+            char item;
+            boolean isKey;
+            HashMap<Character, Node> map;
+
+            public Node() {
+                isKey = false;
+                map = new HashMap<>();
+            }
+
+            public Node(char chr, boolean isKey) {
+                item = chr;
+                this.isKey = isKey;
+                map = new HashMap<>();
+            }
+        }
+    }
 }

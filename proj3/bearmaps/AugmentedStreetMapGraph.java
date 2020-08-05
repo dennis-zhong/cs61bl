@@ -130,7 +130,7 @@ public class AugmentedStreetMapGraph extends StreetMapGraph {
      * "id" -> Number, The id of the node. <br>
      */
     public List<Map<String, Object>> getLocations(String locationName) {
-        if(locationName==null || locationName.equals("")) {
+        if(locationName==null) {
             return new LinkedList<>();
         }
         LinkedList<Map<String, Object>> map = new LinkedList<>();

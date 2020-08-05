@@ -1,4 +1,4 @@
-package bearmaps.utils.ps;
+/*package bearmaps.utils.ps;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -20,11 +20,11 @@ public class KDTree implements PointSet {
             if(!copy.contains(point)) {
                 copy.add(point);
             }
-        }*/
+        }*//*
         root = insert(root, points, 0);
         /*for(Point point: points) {
             root = insert2(root, point, 0);
-        }*/
+        }*//*
     }
 
     private KDNode insert(KDNode curr, List<Point> points, int depth) {
@@ -40,16 +40,16 @@ public class KDTree implements PointSet {
         contents.add(points.get(middle));
         curr = new KDNode(points.get(middle));
         curr.left = insert(curr.left, points.subList(0, middle), depth+1);
-        curr.right = insert(curr.right, points.subList(middle+1, points.size()), depth+1);*/
+        curr.right = insert(curr.right, points.subList(middle+1, points.size()), depth+1);*//*
         points.sort(getComp(depth));
         int middle = points.size()/2;
         curr = new KDNode(points.get(middle));
         curr.left = insert(curr.left, points.subList(0, middle), depth+1);
         curr.right = insert(curr.right, points.subList(middle+1, points.size()), depth+1);
         return curr;
-    }
+    }*/
 
-    private KDNode insert2(KDNode node, Point point, int depth) {
+    /*private KDNode insert2(KDNode node, Point point, int depth) {
         if(node == null) {
             return new KDNode(point);
         } else if(getComp(depth).compare(node.item, point)>0) {
@@ -58,8 +58,8 @@ public class KDTree implements PointSet {
             node.right = insert2(node.right, point, depth+1);
         }
         return node;
-    }
-
+    }*/
+/*
     private Comparator<Point> getComp(int depth) {
         if(depth%2 == 0) {
             return compareX;
@@ -117,7 +117,92 @@ public class KDTree implements PointSet {
             }
             if(Point.distance(badBest, to) < Point.distance(best, to)) {
                 return badBest;
-            }*/
+            }*//*
+            Point simPoint = null;
+            if(depth%2 == 0) {
+                simPoint = new Point(from.item.getX(), to.getY());
+            } else {
+                simPoint = new Point(to.getX(), from.item.getY());
+            }
+            if(Point.distance(simPoint, to)<Point.distance(best.item, to)) {
+                best = nearestHelper(badSide, best, to, depth+1);
+            }
+        }
+        return best;
+    }
+/*
+    private static class KDNode {
+        Point item;
+        KDNode left;
+        KDNode right;
+
+        public KDNode(Point point) {
+            item = point;
+        }
+    }
+}*/
+package bearmaps.utils.ps;
+
+import java.util.Comparator;
+import java.util.List;
+
+public class KDTree implements PointSet {
+
+    private KDNode root;
+    private Comparator<Point> compareX = (a, b) -> Double.compare(a.getX(), b.getX());
+    private Comparator<Point> compareY = (a, b) -> Double.compare(a.getY(), b.getY());
+
+
+    public KDTree(List<Point> points) {
+        root = insert(root, points, 0);
+    }
+
+    private KDNode insert(KDNode curr, List<Point> points, int depth) {
+        if(points.isEmpty()) {
+            return curr;
+        }
+        points.sort(getComp(depth));
+        int middle = points.size()/2;
+        curr = new KDNode(points.get(middle));
+        curr.left = insert(curr.left, points.subList(0, middle), depth+1);
+        curr.right = insert(curr.right, points.subList(middle+1, points.size()), depth+1);
+        return curr;
+    }
+
+    private Comparator<Point> getComp(int depth) {
+        if(depth%2 == 0) {
+            return compareX;
+        } else {
+            return compareY;
+        }
+    }
+
+    @Override
+    public Point nearest(double x, double y) {
+        Point temp = new Point(x, y);
+        return nearestHelper(root, root, temp, 0).item;
+    }
+
+    private KDNode nearestHelper(KDNode from, KDNode best, Point to, int depth) {
+        if(from == null) {
+            return best;
+        }
+        double dist = Point.distance(from.item, to);
+        double bestDist = Point.distance(best.item, to);
+        if(dist<bestDist) {
+            best = from;
+        }
+        KDNode goodSide;
+        KDNode badSide;
+        if(getComp(depth).compare(to, from.item)<0) {
+            goodSide = from.left;
+            badSide = from.right;
+        } else {
+            goodSide = from.right;
+            badSide = from.left;
+        }
+        best = nearestHelper(goodSide, best, to, depth+1);
+        if(badSide != null) {
             Point simPoint = null;
             if(depth%2 == 0) {
                 simPoint = new Point(from.item.getX(), to.getY());

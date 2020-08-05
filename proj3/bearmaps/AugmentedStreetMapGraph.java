@@ -21,24 +21,35 @@ public class AugmentedStreetMapGraph extends StreetMapGraph {
     private KDTree tree;
     private HashMap<Point, Node> map;
     private Trie trie;
-    private HashMap<String, Node> names;
+    private HashMap<String, LinkedList<Node>> names;
 
     public AugmentedStreetMapGraph(String dbPath) {
         super(dbPath);
         map = new HashMap<>();
-        List<Node> nodes = this.getAllNodes();
+        List<Node> nodes = this.getNodes();
         for(Node node: nodes) {
-            double x = projectToX(node.lon(), node.lat());
-            double y = projectToY(node.lon(), node.lat());
-            map.put(new Point(x, y), node);
+            if(isNavigableNode(node)) {
+                double x = projectToX(node.lon(), node.lat());
+                double y = projectToY(node.lon(), node.lat());
+                map.put(new Point(x, y), node);
+            }
         }
         tree = new KDTree(new ArrayList<Point>(map.keySet()));
 
         trie = new Trie();//EC
         names = new HashMap<>();
-        for(Node node: this.getAllNodes().stream().filter(x->x.name()!=null).collect(Collectors.toList())) {
-            trie.add(cleanString(node.name()));
-            names.put(cleanString(node.name()), node);
+        for(Node node: getAllNodes().stream().filter(x->x.name()!=null).collect(Collectors.toList())) {
+            String name = cleanString(node.name());
+            trie.add(name);
+            LinkedList lst;
+            if(names.get(name)==null) {
+                lst = new LinkedList<Node>();
+
+            } else {
+                lst = names.get(name);
+            }
+            lst.add(node);
+            names.put(cleanString(node.name()), lst);
         }
     }
 
@@ -98,7 +109,9 @@ public class AugmentedStreetMapGraph extends StreetMapGraph {
     public List<String> getLocationsByPrefix(String prefix) {
         ArrayList<String> locations = new ArrayList<>();
         for(String str: trie.keysWithPrefix(prefix)) {
-            locations.add(names.get(str).name());
+            for(Node node: names.get(str)) {
+                locations.add(node.name());
+            }
         }
         return locations;
     }
@@ -121,9 +134,7 @@ public class AugmentedStreetMapGraph extends StreetMapGraph {
             return new LinkedList<>();
         }
         LinkedList<Map<String, Object>> map = new LinkedList<>();
-        List<String> locations = trie.keysWithPrefix(cleanString(locationName));
-        for(String string: locations) {
-            Node node = names.get(string);
+        for(Node node : names.get(locationName)) {
             HashMap<String, Object> curr = new HashMap<>();
             curr.put("lat", node.lat());
             curr.put("lon", node.lon());
@@ -180,6 +191,10 @@ public class AugmentedStreetMapGraph extends StreetMapGraph {
                 key = key.substring(1);
             } while (!key.equals(""));
             return pointer.isKey;
+        }
+
+        public List<String> keysMatching(String key) {
+            return new LinkedList<String>();
         }
 
         /** Returns a list of all words that start with PREFIX */
@@ -244,3 +259,8 @@ public class AugmentedStreetMapGraph extends StreetMapGraph {
         }
     }
 }
+/*
+<[E-22 Cafe, Earth Sciences and Map Library, Earth Song Tuning Fork, Earthly Coffee, Earthly Goods, East Bay Regional Park Fire Department, East Bay Center for the Blind, East Bay Community Law Center, East Bay Spice Company, East Bay Depot For Creative Reuse, East Bay Liquors, East Bay Media Center, East Bay Nursery, East Gate, Eastern City Cafe, Eastern Classics, Eastern Supply, Eastwind Books of Berkeley, Easy Creole, Eat @ Thai, eatsa, Ebenezer Missionary Baptist Church, Eclipxe, ecoPartners, LLC, Ecole Bilingue, Ecology CenterFarmer's Market, EconoGas, Eddie's Liquor Video, Education Psychology Library, Edible Arrangements, El Burro Picante, Elder, Elder & Pine, Elephant Bar Restaurant, 7-Eleven, Elegant Nails, Elixir, Elks Club Building, Ellsworth Structure, Ellis Ace Hardware, Elmwood, Elmwood Station Berkeley Post Office, Elmwood Stationery, Elmwood Care Center, Elmwood Cafe, Elmwood Theater, Elmwood Laundry, Elmwood Nursing and Rehab Center, Empty Gate Zen Center, Emerville City Hall, Emerybay Cafe, Emeryville, Emeryville Bayer Healthcare, Emeryville Center of Community Life, Emeryville Child Development Center, Emeryville City Hall, Emeryville Market, Emilia's Pizzeria, Emmanuel Presbyterian Church, Enterprise, Enterprise Rent-A-Car, Enterprise Rent-a-Car, Enterprise Rent-a-car, Environmental Design Archives, Environmental Design Library, Enhance A Village, Ennor's Restaurant Building, Enoteca Molinari, Epworth West Lot, Epoch Frameworks, Equator Coffee, Era M. Casey Center, Espresso Roma, Espresso Experience, Estates 31-010 Dam, Ethiopian Market, Ethnic Studies Library, Eureka Peak, Euromix Delicatessen, Euclid Av & #1151, Euclid Av & #1152, Euclid Av & Bayview Pl, Euclid Av & Bret Harte Path, Euclid Av & Ridge Rd, Euclid Av & Rose Walk, Euclid Av & Cragmont Av, Euclid Av & Cedar St, Euclid Av & Codornices Park, Euclid Av & Eunice St, Euclid Av & Virginia St, Euclid Av & Vine Ln, Euclid Av & Hawthrone Ter, Euclid Av & Hearst Av, Euclid Av & Hilgard Av, Euclid Av & Le Conte Av, Eudemonia, Eunice Gourmet Cafe, Everett and Jones, Evergreen Baptist Church, Evergreen Entrance, Evolution Home Furnishings, Express, Ex'pression College for Digital Arts, Extreme Pizza, E-Z Stop Deli, EZ Laundry]>
+but was:<[E-22 Cafe, Earth Sciences and Map Library, Earth Song Tuning Fork, Earthly Coffee, Earthly Goods, East Bay Regional Park Fire Department, East Bay Center for the Blind, East Bay Community Law Center, East Bay Spice Company, East Bay Depot For Creative Reuse, East Bay Liquors, East Bay Media Center, East Bay Nursery, East Gate, Eastern City Cafe, Eastern Classics, Eastern Supply, Eastwind Books of Berkeley, Easy Creole, Eat @ Thai, eatsa, Ebenezer Missionary Baptist Church, Eclipxe, ecoPartners, LLC, Ecole Bilingue, Ecology CenterFarmer's Market, EconoGas, Eddie's Liquor Video, Education Psychology Library, Edible Arrangements, El Burro Picante, Elder, Elder & Pine, Elephant Bar Restaurant, 7-Eleven, Elegant Nails, Elixir, Elks Club Building, Ellsworth Structure, Ellis Ace Hardware, Elmwood, Elmwood Station Berkeley Post Office, Elmwood Stationery, Elmwood Care Center, Elmwood Cafe, Elmwood Theater, Elmwood Laundry, Elmwood Nursing and Rehab Center, Empty Gate Zen Center, Emerville City Hall, Emerybay Cafe, Emeryville, Emeryville Bayer Healthcare, Emeryville Center of Community Life, Emeryville Child Development Center, Emeryville City Hall, Emeryville Market, Emilia's Pizzeria, Emmanuel Presbyterian Church, Enterprise, Enterprise Rent-a-car, Environmental Design Archives, Environmental Design Library, Enhance A Village, Ennor's Restaurant Building, Enoteca Molinari, Epworth West Lot, Epoch Frameworks, Equator Coffee, Era M. Casey Center, Espresso Roma, Espresso Experience, Estates 31-010 Dam, Ethiopian Market, Ethnic Studies Library, Eureka Peak, Euromix Delicatessen, Euclid Av & #1152, Euclid Av & Bayview Pl, Euclid Av & Bret Harte Path, Euclid Av & Ridge Rd, Euclid Av & Rose Walk, Euclid Av & Cragmont Av, Euclid Av & Cedar St, Euclid Av & Codornices Park, Euclid Av & Eunice St, Euclid Av & Virginia St, Euclid Av & Vine Ln, Euclid Av & Hawthrone Ter, Euclid Av & Hearst Av, Euclid Av & Hilgard Av, Euclid Av & Le Conte Av, Eudemonia, Eunice Gourmet Cafe, Everett and Jones, Evergreen Baptist Church, Evergreen Entrance, Evolution Home Furnishings, Express, Ex'pression College for Digital Arts, Extreme Pizza, E-Z Stop Deli, EZ Laundry]>
+
+ */

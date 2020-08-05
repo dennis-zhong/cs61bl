@@ -26,7 +26,7 @@ public class AugmentedStreetMapGraph extends StreetMapGraph {
     public AugmentedStreetMapGraph(String dbPath) {
         super(dbPath);
         map = new HashMap<>();
-        List<Node> nodes = this.getNodes();
+        List<Node> nodes = this.getAllNodes();
         for(Node node: nodes) {
             double x = projectToX(node.lon(), node.lat());
             double y = projectToY(node.lon(), node.lat());
@@ -36,7 +36,7 @@ public class AugmentedStreetMapGraph extends StreetMapGraph {
 
         trie = new Trie();//EC
         names = new HashMap<>();
-        for(Node node: this.getNodes().stream().filter(x->x.name()!=null).collect(Collectors.toList())) {
+        for(Node node: this.getAllNodes().stream().filter(x->x.name()!=null).collect(Collectors.toList())) {
             trie.add(cleanString(node.name()));
             names.put(cleanString(node.name()), node);
         }

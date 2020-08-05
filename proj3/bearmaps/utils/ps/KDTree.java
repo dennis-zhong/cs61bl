@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class KDTree implements PointSet {
 
@@ -20,7 +21,7 @@ public class KDTree implements PointSet {
                 copy.add(point);
             }
         }*/
-        root = insert(root, new ArrayList<>(points), 0);
+        root = insert(root, points.stream().collect(Collectors.toList()), 0);
     }
 
     private KDNode insert(KDNode curr, List<Point> points, int depth) {

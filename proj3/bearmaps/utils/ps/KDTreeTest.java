@@ -69,10 +69,10 @@ public class KDTreeTest {
             }
             Stopwatch watch3 = new Stopwatch();
             NaivePointSet nn = new NaivePointSet(lst);
-            totalRound1+=watch3.elapsedTime();
+            //totalRound1+=watch3.elapsedTime();
             Stopwatch watch4 = new Stopwatch();
             KDTree tree = new KDTree(lst);
-            totalRound2+=watch4.elapsedTime();
+            //totalRound2+=watch4.elapsedTime();
             for(int b = 0; b<10000; b++) {
                 double x = Math.random() * 1000;
                 double y = Math.random() * 1000;

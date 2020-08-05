@@ -7,6 +7,7 @@ import bearmaps.utils.ps.KDTree;
 import bearmaps.utils.ps.Point;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * An augmented graph that is more powerful that a standard StreetMapGraph.
@@ -86,7 +87,9 @@ public class AugmentedStreetMapGraph extends StreetMapGraph {
      * cleaned <code>prefix</code>.
      */
     public List<String> getLocationsByPrefix(String prefix) {
-        return new LinkedList<>();
+        return getNodes().stream().filter(x->x.name()!=null)
+                .map(x->x.name()).filter(x->cleanString(x).startsWith(cleanString(prefix)))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -103,7 +106,19 @@ public class AugmentedStreetMapGraph extends StreetMapGraph {
      * "id" -> Number, The id of the node. <br>
      */
     public List<Map<String, Object>> getLocations(String locationName) {
-        return new LinkedList<>();
+        LinkedList<Map<String, Object>> map = new LinkedList<>();
+        List<Node> locations = getNodes().stream().filter(x->x.name()!=null)
+                .filter(x->cleanString(x.name()).equals(cleanString(locationName)))
+                .collect(Collectors.toList());
+        for(Node node: locations) {
+            HashMap<String, Object> curr = new HashMap<>();
+            curr.put("lat", node.lat());
+            curr.put("lon", node.lon());
+            curr.put("name", node.name());
+            curr.put("id", node.id());
+            map.add(curr);
+        }
+        return map;
     }
 
 

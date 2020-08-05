@@ -5,6 +5,7 @@ import bearmaps.utils.graph.streetmap.Node;
 import bearmaps.utils.graph.streetmap.StreetMapGraph;
 import bearmaps.utils.ps.KDTree;
 import bearmaps.utils.ps.Point;
+import org.eclipse.jetty.util.Trie;
 
 import java.util.*;
 
@@ -19,6 +20,7 @@ public class AugmentedStreetMapGraph extends StreetMapGraph {
 
     private KDTree tree;
     private HashMap<Point, Node> map;
+    Trie<String> trie;
 
     public AugmentedStreetMapGraph(String dbPath) {
         super(dbPath);

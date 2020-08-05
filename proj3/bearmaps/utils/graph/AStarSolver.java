@@ -26,11 +26,7 @@ public class AStarSolver<Vertex> implements ShortestPathsSolver<Vertex> {
         MinHeapPQ<Vertex> heap = new MinHeapPQ<>();
         heap.insert(start, 0);
         mapDist.put(start, 0.0);
-        while(!heap.peek().equals(end)) {
-            if(heap.size() == 0) {
-                outcome = SolverOutcome.UNSOLVABLE;
-                break;
-            }
+        while(heap.size() != 0 && !heap.peek().equals(end)) {
             if(watch.elapsedTime()>timeout*1000) {
                 outcome = SolverOutcome.TIMEOUT;
                 break;
@@ -53,6 +49,9 @@ public class AStarSolver<Vertex> implements ShortestPathsSolver<Vertex> {
             }
         }
         exploreTime = watch.elapsedTime();
+        if(heap.size() == 0) {
+            outcome = SolverOutcome.UNSOLVABLE;
+        }
         if(outcome == SolverOutcome.TIMEOUT || outcome == SolverOutcome.UNSOLVABLE) {
             solution.clear();
             totalWeight = 0;

@@ -16,7 +16,7 @@ public class DistributionSorts {
         }
         for(int x = 0; x < 10; x++) {
             while(x!=10) {
-                if(starts[x]==20) {
+                if(starts[x]==arr.length) {
                     break;
                 }
                 arr[starts[x]] = x;

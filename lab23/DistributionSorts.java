@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.util.Arrays;
 
 public class DistributionSorts {
@@ -5,7 +6,23 @@ public class DistributionSorts {
     /* Destructively sorts ARR using counting sort. Assumes that ARR contains
        only 0, 1, ..., 9. */
     public static void countingSort(int[] arr) {
-        // TODO: YOUR CODE HERE
+        int[] counts = new int[10];
+        int[] starts = new int[10];
+        for(int x: arr) {
+            counts[x]++;
+        }
+        for(int i = 0; i < counts.length-1; i++) {
+            starts[i+1] = counts[i]+starts[i];
+        }
+        for(int x = 0; x < 10; x++) {
+            while(x!=10) {
+                if(starts[x]==20) {
+                    break;
+                }
+                arr[starts[x]] = x;
+                starts[x]+=1;
+            }
+        }
     }
 
     /* Destructively sorts ARR using LSD radix sort. */
@@ -20,7 +37,32 @@ public class DistributionSorts {
        DIGIT-th digit. When DIGIT is equal to 0, sort the numbers by the
        rightmost digit of each number. */
     private static void countingSortOnDigit(int[] arr, int digit) {
-        // TODO: YOUR CODE HERE
+        /*int[] correct = new int[arr.length];
+        int next = 0;
+        for(int i = 0; i<10; i++) {
+            for(int j = 0; j<arr.length; j++) {
+                if(arr[j]/Math.pow(10, digit)%10==i) {
+                    correct[next] = arr[j];
+                    next++;
+                }
+            }
+        }
+        System.arraycopy(correct, 0, arr, 0, arr.length);*/
+        int[] counts = new int[10];
+        int[] starts = new int[10];
+        for(int x: arr) {
+            counts[(int) (x/Math.pow(10, digit)%10)]++;
+        }
+        for(int i = 0; i < counts.length-1; i++) {
+            starts[i+1] = counts[i]+starts[i];
+        }
+        int[] correct = new int[arr.length];
+        for(int x: arr) {
+            int num = (int) (x/Math.pow(10, digit)%10);
+            correct[starts[num]] = x;
+            starts[num]++;
+        }
+        System.arraycopy(correct, 0, arr, 0, arr.length);
     }
 
     /* Returns the largest number of digits that any integer in ARR has. */

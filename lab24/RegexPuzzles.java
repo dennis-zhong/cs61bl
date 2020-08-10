@@ -15,7 +15,6 @@ public class RegexPuzzles {
     public static List<String> urlRegex(String[] urls) {
         List<String> lst = new ArrayList<>();
         Pattern pat = Pattern.compile("\\(\\w*?https?://(\\w+?\\.)+?[a-z]{2,3}/\\w+?\\.html\\w*?\\)");
-
         for(String url:  urls) {
             Matcher mat = pat.matcher(url);
             if(mat.matches()) {
@@ -26,8 +25,15 @@ public class RegexPuzzles {
     }
 
     public static List<String> findStartupName(String[] names) {
-        // Create a String pattern to fill return array
-        return null;
+        List<String> lst = new ArrayList<>();
+        Pattern pat = Pattern.compile("(Data|App|my|on|un)[0-z^i]+?(ly|sy|ify|\\.io|\\.fm|\\.tv)");
+        for(String name:  names) {
+            Matcher mat = pat.matcher(name);
+            if(mat.matches()) {
+                lst.add(name);
+            }
+        }
+        return lst;
     }
 
     public static BufferedImage imageRegex(String filename, int width, int height) {

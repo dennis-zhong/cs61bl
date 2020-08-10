@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 public class RegexPuzzles {
     public static List<String> urlRegex(String[] urls) {
         List<String> lst = new ArrayList<>();
-        Pattern pat = Pattern.compile("\\(\\w*?https?://(\\w*?\\.)*?[a-z]{2,3}/\\w+?\\.html\\w*?\\)");
+        Pattern pat = Pattern.compile("\\(\\w*?https?://(\\w+?\\.)+?[a-z]{2,3}/\\w+?\\.html\\w*?\\)");
 
         for(String url:  urls) {
             Matcher mat = pat.matcher(url);

@@ -6,14 +6,23 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RegexPuzzles {
     public static List<String> urlRegex(String[] urls) {
-        // Create a String pattern to fill return array
-        return null;
+        List<String> lst = new ArrayList<>();
+        Pattern pat = Pattern.compile("\\(\\w*?https?://(\\w*?\\.)*?[a-z]{2,3}/\\w+?\\.html\\w*?\\)");
+
+        for(String url:  urls) {
+            Matcher mat = pat.matcher(url);
+            if(mat.matches()) {
+                lst.add(url);
+            }
+        }
+        return lst;
     }
 
     public static List<String> findStartupName(String[] names) {
@@ -30,21 +39,29 @@ public class RegexPuzzles {
         }
 
         // Initialize both Patterns and 3-d array
+        Pattern RGB = Pattern.compile("\\[([0-9]{1,3}), ([0-9]{1,3}), ([0-9]{1,3})\\]");
+        Pattern loc = Pattern.compile("\\(([0-9]{1,3}), ([0-9]{1,3})\\)");
+        int[][][] arr = new int[height][width][3];
         try {
             String line;
             while ((line = br.readLine()) != null) {
                 // Initialize both Matchers and find() for each
-
-                // Parse each group as an Integer
-
-                // Store in array
+                Matcher rgbmatcher = RGB.matcher(line);
+                Matcher locmatcher = loc.matcher(line);
+                while(rgbmatcher.find() && locmatcher.find()) {
+                    int x = Integer.valueOf(locmatcher.group(1));
+                    int y = Integer.valueOf(locmatcher.group(2));
+                    for(int i=0; i<3; i++) {
+                        arr[x][y][i] = Integer.valueOf(rgbmatcher.group(i+1));
+                    }
+                }
             }
         } catch (IOException e) {
             System.err.printf("Input error: %s%n", e.getMessage());
             System.exit(1);
         }
         // Return the BufferedImage of the array
-        return null;
+        return arrayToBufferedImage(arr);
     }
 
     public static BufferedImage arrayToBufferedImage(int[][][] arr) {

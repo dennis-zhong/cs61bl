@@ -26,7 +26,7 @@ public class RegexPuzzles {
 
     public static List<String> findStartupName(String[] names) {
         List<String> lst = new ArrayList<>();
-        Pattern pat = Pattern.compile("(Data|App|my|on|un)[0-z^i]+?(ly|sy|ify|\\.io|\\.fm|\\.tv)");
+        Pattern pat = Pattern.compile("(Data|App|my|on|un)[0-h, j-z]+?(ly|sy|ify|\\.io|\\.fm|\\.tv)");
         for(String name:  names) {
             Matcher mat = pat.matcher(name);
             if(mat.matches()) {

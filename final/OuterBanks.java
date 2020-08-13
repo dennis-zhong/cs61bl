@@ -23,17 +23,26 @@ public class OuterBanks {
             notVisited.add(i);
         }
         Stack<Integer> fringe = new Stack<>();
-        fringe.add(0);
+        //fringe.add(0);
         HashSet<Integer> visited = new HashSet<>();
         int counter = 0;
         while(!notVisited.isEmpty()) {
-            fringe.add(notVisited.get(0));
+            Integer next = notVisited.get(0);
+            /*for(int i = 0; i<g.numVertices;i++) {
+                if(!g.neighbors(i).isEmpty()&&notVisited.contains(i)) {
+                    next = i;
+                    break;
+                }
+            }*/
+            fringe.add(next);
             DFS(g, fringe, visited);
-            for(int x: visited) {
-                notVisited.remove(new Integer(x));
+            for(Integer x: visited) {
+                notVisited.remove(x);
             }
             counter++;
         }
         return counter;
     }
+
+    //Optional: your code here
 }

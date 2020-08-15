@@ -9,6 +9,10 @@ public class ArrayOperations {
             return;
         }
         // TODO: YOUR CODE HERE
+        for(int i = pos; i < values.length-1; i++){
+          values[i]=values[i+1];
+        }
+        values[values.length-1] = 0;
     }
 
     /**
@@ -21,5 +25,9 @@ public class ArrayOperations {
             return;
         }
         // TODO: YOUR CODE HERE
+        for(int i = values.length-1; i > pos; i--){
+          values[i] = values[i-1];
+        }
+        values[pos] = newInt;
     }
 }
